@@ -1,7 +1,10 @@
 package com.qzakapps.sellingpricecalc.viewmodels
 
 import androidx.lifecycle.ViewModel
+import com.qzakapps.sellingpricecalc.helper.calculateSalePrice
+import com.qzakapps.sellingpricecalc.helper.toBigDecimal
 import io.reactivex.rxjava3.core.Observable
+import io.reactivex.rxjava3.functions.BiFunction
 import io.reactivex.rxjava3.subjects.BehaviorSubject
 
 interface CalculationViewModelInputs {
@@ -16,12 +19,10 @@ interface CalculationViewModelOutputs {
 
 class CalculationViewModel : ViewModel(), CalculationViewModelInputs, CalculationViewModelOutputs {
 
-    var inputs: CalculationViewModelInputs = this
-    var outputs: CalculationViewModelOutputs = this
+    override val inputCostPrice: BehaviorSubject<String> = BehaviorSubject.createDefault("")
+    override val inputProfitMargin: BehaviorSubject<String> = BehaviorSubject.createDefault("")
 
-    override val inputCostPrice = BehaviorSubject.createDefault("")
-    override val inputProfitMargin = BehaviorSubject.createDefault("")
-
+    //region inputs
     fun onCostPriceTextChange(text: String){
         inputCostPrice.onNext(text)
     }
@@ -30,5 +31,16 @@ class CalculationViewModel : ViewModel(), CalculationViewModelInputs, Calculatio
         inputProfitMargin.onNext(text)
     }
 
-    override val outputSalePrice: Observable<String> = inputCostPrice
+    //endregion
+
+    //region outputs
+    override val outputSalePrice: Observable<String> =
+            Observable.combineLatest(
+                    inputCostPrice,
+                    inputProfitMargin,
+                    BiFunction {
+                        cost, profit ->
+                        calculateSalePrice(toBigDecimal(cost), toBigDecimal(profit)).toString()
+                    })
+    //endregion
 }
