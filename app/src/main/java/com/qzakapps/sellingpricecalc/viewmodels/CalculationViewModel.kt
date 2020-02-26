@@ -1,46 +1,143 @@
 package com.qzakapps.sellingpricecalc.viewmodels
 
 import androidx.lifecycle.ViewModel
-import com.qzakapps.sellingpricecalc.helper.calculateSalePrice
+import com.qzakapps.sellingpricecalc.helper.calculateProfit
 import com.qzakapps.sellingpricecalc.helper.toBigDecimal
 import io.reactivex.rxjava3.core.Observable
+import io.reactivex.rxjava3.core.Observable.combineLatest
 import io.reactivex.rxjava3.functions.BiFunction
+import io.reactivex.rxjava3.functions.Function3
 import io.reactivex.rxjava3.subjects.BehaviorSubject
 
 interface CalculationViewModelInputs {
-    val inputCostPrice: BehaviorSubject<String>
+    val inputFixedCost: BehaviorSubject<String>
+    val inputPercentCost: BehaviorSubject<String>
+
     val inputProfitMargin: BehaviorSubject<String>
+    val inputSalePrice: BehaviorSubject<String>
+    val inputProfit: BehaviorSubject<String>
+    val inputMarkup: BehaviorSubject<String>
 
 }
 
 interface CalculationViewModelOutputs {
-    val outputSalePrice: Observable<String>
+    fun outputSalePrice(): Observable<String>
+    fun outputMarkup(): Observable<String>
+    fun outputProfit(): Observable<String>
+    fun outputProfitMargin(): Observable<String>
 }
 
 class CalculationViewModel : ViewModel(), CalculationViewModelInputs, CalculationViewModelOutputs {
 
-    override val inputCostPrice: BehaviorSubject<String> = BehaviorSubject.createDefault("")
+    override val inputFixedCost: BehaviorSubject<String> = BehaviorSubject.createDefault("")
+    override val inputPercentCost: BehaviorSubject<String> = BehaviorSubject.createDefault("")
+
     override val inputProfitMargin: BehaviorSubject<String> = BehaviorSubject.createDefault("")
+    override val inputSalePrice: BehaviorSubject<String> = BehaviorSubject.createDefault("")
+    override val inputProfit: BehaviorSubject<String> = BehaviorSubject.createDefault("")
+    override val inputMarkup: BehaviorSubject<String> = BehaviorSubject.createDefault("")
 
     //region inputs
-    fun onCostPriceTextChange(text: String){
-        inputCostPrice.onNext(text)
+    fun onFixedCostTextChange(text: String){
+        inputFixedCost.onNext(text)
+    }
+
+    fun onPercentCostTextChange(text: String){
+        inputPercentCost.onNext(text)
     }
 
     fun onProfitMarginTextChange(text: String){
         inputProfitMargin.onNext(text)
     }
 
+    fun onSalePriceTextChange(text: String){
+        inputSalePrice.onNext(text)
+    }
+
+    fun onProfitTextChange(text: String){
+        inputProfit.onNext(text)
+    }
+
+    fun onMarkupTextChange(text: String){
+        inputMarkup.onNext(text)
+    }
+
     //endregion
 
     //region outputs
+    /**
+    Each output will be triggered by user typing on one of the other 3 outputs.
+    E.g Sale price will be triggered by either Markup, Profit or Profit Margin being changed.
+    */
+    override fun outputSalePrice(): Observable<String> {
+
+    }
+
+    override fun outputMarkup(): Observable<String> {
+
+    }
+
+    override fun outputProfit(): Observable<String> {
+         return combineLatest(
+            inputSalePrice,
+            inputFixedCost,
+            inputPercentCost,
+            Function3<String, String, String, String> {
+                salePrice, fixedCost, percentCost -> "using sale price"
+            }).mergeWith(
+             combineLatest(
+                 inputSalePrice,
+                 inputFixedCost,
+                 inputPercentCost,
+                 Function3<String, String, String, String> {
+                         salePrice, fixedCost, percentCost -> "using sale price"
+                 })
+         )
+    }
+
+    override fun outputProfitMargin(): Observable<String> {
+
+    }
+
+    //endregion
+    /*
+    //This needs to be all fixed costs AND all percentage costs. Currently only cost and profit margin
     override val outputSalePrice: Observable<String> =
-            Observable.combineLatest(
-                    inputCostPrice,
+            combineLatest(
+                    inputFixedCost,
                     inputProfitMargin,
                     BiFunction {
-                        cost, profit ->
-                        calculateSalePrice(toBigDecimal(cost), toBigDecimal(profit)).toString()
+                        cost, profitMargin ->
+                        calculateSalePrice(toBigDecimal(cost), toBigDecimal(profitMargin))
                     })
-    //endregion
+
+    //This needs to be all fixed costs. Currently only cost of item
+    override val outputMarkup: Observable<String> =
+            combineLatest(
+                    inputProfit,
+                    inputFixedCost,
+                    BiFunction {
+                        profit, cost ->
+                        calculateMarkup(toBigDecimal(profit), toBigDecimal(cost))
+                    })
+
+    override val outputProfit: Observable<String> =
+        combineLatest(
+            inputSalePrice,
+            inputProfitMargin,
+            BiFunction {
+                    sale, profitMargin ->
+                calculateProfit(toBigDecimal(sale), toBigDecimal(profitMargin))
+            })
+
+    override val outputProfitMargin: Observable<String> =
+        combineLatest(
+            inputProfit,
+            inputSalePrice,
+            BiFunction {
+                    profit, salePrice ->
+                calculateProfitMargin(toBigDecimal(profit), toBigDecimal(salePrice))
+            })
+
+    */
 }

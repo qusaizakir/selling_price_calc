@@ -7,7 +7,11 @@
     </style>
 
     <style name="EditTextCalc" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
-
+        <item name="layout_constraintStart_toStartOf">parent</item>
+        <item name="layout_constraintEnd_toEndOf">parent</item>
+        <item name="android:layout_marginStart">@dimen/calculation_start_margin</item>
+        <item name="android:layout_marginEnd">@dimen/calculation_end_margin</item>
+        <item name="errorEnabled">true</item>
     </style>
 
 </resources>

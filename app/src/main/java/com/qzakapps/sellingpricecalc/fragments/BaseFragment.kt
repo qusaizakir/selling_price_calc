@@ -23,7 +23,7 @@ abstract class BaseFragment<V : ViewModel> : Fragment() {
         super.onDestroy()
     }
 
-    public fun Disposable.autoDispose() {
+    fun Disposable.autoDispose() {
         compositeDisposable.add(this)
     }
 

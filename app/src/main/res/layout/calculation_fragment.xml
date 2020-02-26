@@ -7,22 +7,34 @@
     android:layout_height="match_parent">
 
     <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/calculationTiCostPrice"
+        android:id="@+id/calculationTiFixedCost"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="@string/cost_price"
         style="@style/EditTextCalc"
-        app:errorEnabled="true"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"
         android:layout_marginTop="16dp"
         android:layout_marginBottom="8dp">
 
         <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/calculationEtCostPrice"
+            android:id="@+id/calculationEtFixedCost"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="numberDecimal"/>
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/calculationTiPercentageCost"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="@string/percentage_cost"
+        style="@style/EditTextCalc"
+        app:layout_constraintTop_toBottomOf="@id/calculationTiFixedCost"
+        android:layout_marginBottom="8dp">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/calculationEtPercentageCost"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:inputType="numberDecimal"/>
@@ -35,12 +47,7 @@
         android:layout_height="wrap_content"
         android:hint="@string/profit_margin"
         style="@style/EditTextCalc"
-        app:errorEnabled="true"
-        app:layout_constraintTop_toBottomOf="@id/calculationTiCostPrice"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"
+        app:layout_constraintTop_toBottomOf="@id/calculationTiPercentageCost"
         android:layout_marginBottom="8dp"
         >
         <com.google.android.material.textfield.TextInputEditText
@@ -57,16 +64,45 @@
         android:layout_height="wrap_content"
         android:hint="@string/sale_price"
         style="@style/EditTextCalc"
-        app:errorEnabled="true"
         app:layout_constraintTop_toBottomOf="@id/calculationTiProfitMargin"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"
         android:layout_marginBottom="8dp"
         >
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/calculationEtSalePrice"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="numberDecimal"/>
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/calculationTiMarkup"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="@string/markup"
+        style="@style/EditTextCalc"
+        app:layout_constraintTop_toBottomOf="@id/calculationTiSalePrice"
+        android:layout_marginBottom="8dp"
+        >
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/calculationEtMarkup"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="numberDecimal"/>
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/calculationTiProfit"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="@string/profit"
+        style="@style/EditTextCalc"
+        app:layout_constraintTop_toBottomOf="@id/calculationTiMarkup"
+        android:layout_marginBottom="8dp"
+        >
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/calculationEtProfit"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:inputType="numberDecimal"/>
