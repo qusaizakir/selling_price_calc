@@ -1,11 +1,9 @@
 package com.qzakapps.sellingpricecalc.viewmodels
 
 import androidx.lifecycle.ViewModel
-import com.qzakapps.sellingpricecalc.helper.calculateProfit
-import com.qzakapps.sellingpricecalc.helper.toBigDecimal
+import com.qzakapps.sellingpricecalc.helper.*
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.core.Observable.combineLatest
-import io.reactivex.rxjava3.functions.BiFunction
 import io.reactivex.rxjava3.functions.Function3
 import io.reactivex.rxjava3.subjects.BehaviorSubject
 
@@ -70,11 +68,61 @@ class CalculationViewModel : ViewModel(), CalculationViewModelInputs, Calculatio
     E.g Sale price will be triggered by either Markup, Profit or Profit Margin being changed.
     */
     override fun outputSalePrice(): Observable<String> {
-
+        return combineLatest(
+            inputMarkup,
+            inputFixedCost,
+            inputPercentCost,
+            Function3<String, String, String, String> {
+                    markup, fixedCost, percentCost ->
+                calculateSalePriceWithMarkup(toBigDecimal(markup), toBigDecimal(fixedCost), toBigDecimal(percentCost))
+            }).mergeWith(
+            combineLatest(
+                inputProfit,
+                inputFixedCost,
+                inputPercentCost,
+                Function3<String, String, String, String> {
+                        profit, fixedCost, percentCost ->
+                    calculateSalePriceWithProfit(toBigDecimal(profit), toBigDecimal(fixedCost), toBigDecimal(percentCost))
+                })
+        ).mergeWith(
+            combineLatest(
+                inputProfitMargin,
+                inputFixedCost,
+                inputPercentCost,
+                Function3<String, String, String, String> {
+                        profitMargin, fixedCost, percentCost ->
+                    calculateSalePriceWithProfitMargin(toBigDecimal(profitMargin), toBigDecimal(fixedCost), toBigDecimal(percentCost))
+                })
+        )
     }
 
     override fun outputMarkup(): Observable<String> {
-
+        return combineLatest(
+            inputSalePrice,
+            inputFixedCost,
+            inputPercentCost,
+            Function3<String, String, String, String> {
+                    salePrice, fixedCost, percentCost ->
+                calculateMarkupWithSalePrice(toBigDecimal(salePrice), toBigDecimal(fixedCost), toBigDecimal(percentCost))
+            }).mergeWith(
+            combineLatest(
+                inputProfit,
+                inputFixedCost,
+                inputPercentCost,
+                Function3<String, String, String, String> {
+                        profit, fixedCost, percentCost ->
+                    calculateMarkupWithProfit(toBigDecimal(profit), toBigDecimal(fixedCost), toBigDecimal(percentCost))
+                })
+        ).mergeWith(
+            combineLatest(
+                inputProfitMargin,
+                inputFixedCost,
+                inputPercentCost,
+                Function3<String, String, String, String> {
+                        profitMargin, fixedCost, percentCost ->
+                    "using profitMargin"
+                })
+        )
     }
 
     override fun outputProfit(): Observable<String> {
@@ -86,17 +134,47 @@ class CalculationViewModel : ViewModel(), CalculationViewModelInputs, Calculatio
                 salePrice, fixedCost, percentCost -> "using sale price"
             }).mergeWith(
              combineLatest(
-                 inputSalePrice,
+                 inputMarkup,
                  inputFixedCost,
                  inputPercentCost,
                  Function3<String, String, String, String> {
-                         salePrice, fixedCost, percentCost -> "using sale price"
+                         markup, fixedCost, percentCost -> "using markup"
+                 })
+            ).mergeWith(
+             combineLatest(
+                 inputProfitMargin,
+                 inputFixedCost,
+                 inputPercentCost,
+                 Function3<String, String, String, String> {
+                         profitMargin, fixedCost, percentCost -> "using profitMargin"
                  })
          )
     }
 
     override fun outputProfitMargin(): Observable<String> {
-
+        return combineLatest(
+            inputSalePrice,
+            inputFixedCost,
+            inputPercentCost,
+            Function3<String, String, String, String> {
+                    salePrice, fixedCost, percentCost -> "using sale price"
+            }).mergeWith(
+            combineLatest(
+                inputMarkup,
+                inputFixedCost,
+                inputPercentCost,
+                Function3<String, String, String, String> {
+                        markup, fixedCost, percentCost -> "using markup"
+                })
+        ).mergeWith(
+            combineLatest(
+                inputProfit,
+                inputFixedCost,
+                inputPercentCost,
+                Function3<String, String, String, String> {
+                        profit, fixedCost, percentCost -> "using profitMargin"
+                })
+        )
     }
 
     //endregion

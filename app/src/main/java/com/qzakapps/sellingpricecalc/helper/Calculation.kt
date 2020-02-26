@@ -24,6 +24,37 @@ fun calculateMarkup(profit: BigDecimal, costPrice: BigDecimal): String {
     return  ((profit / costPrice) * _100).setTwoDecimalToString()
 }
 
+
+
+
+
+fun calculateSalePriceWithMarkup(markup: BigDecimal, fixedCost: BigDecimal, percentCost: BigDecimal): String {
+    return (((markup * fixedCost) / _100) + fixedCost).setTwoDecimalToString()
+}
+
+fun calculateSalePriceWithProfit(profit: BigDecimal, fixedCost: BigDecimal, percentCost: BigDecimal): String {
+    return (profit + fixedCost).setTwoDecimalToString()
+}
+
+fun calculateSalePriceWithProfitMargin(profitMargin: BigDecimal, fixedCost: BigDecimal, percentCost: BigDecimal): String {
+    return (fixedCost / (_1 - profitMargin)).setTwoDecimalToString()
+}
+
+
+fun calculateMarkupWithSalePrice(salePrice: BigDecimal, fixedCost: BigDecimal, percentCost: BigDecimal): String {
+    return (((salePrice - fixedCost) * _100) / fixedCost).setTwoDecimalToString()
+}
+
+fun calculateMarkupWithProfit(profit: BigDecimal, fixedCost: BigDecimal, percentCost: BigDecimal): String {
+    return ((profit / fixedCost) * _100).setTwoDecimalToString()
+}
+
+fun calculateMarkupWithProfitMargin(profitMargin: BigDecimal, fixedCost: BigDecimal, percentCost: BigDecimal): String {
+    return
+}
+
+
+
 //endregion
 
 fun BigDecimal.setTwoDecimalToString(): String {
