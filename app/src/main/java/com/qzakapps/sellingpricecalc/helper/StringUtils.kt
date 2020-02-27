@@ -6,8 +6,8 @@ import java.text.ParseException
 
 fun toBigDecimal(number: String): BigDecimal {
     return try {
-        NumberFormat.getInstance().parse(number)?.toDouble()?.let { BigDecimal(it) } ?: BigDecimal.ONE
+        NumberFormat.getInstance().parse(number)?.toDouble()?.let { BigDecimal(it) } ?: BigDecimal.TEN
     } catch (e : ParseException){
-        return BigDecimal.ONE
+        return BigDecimal.TEN
     }
 }

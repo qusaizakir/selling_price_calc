@@ -6,6 +6,7 @@ import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.core.Observable.combineLatest
 import io.reactivex.rxjava3.functions.Function3
 import io.reactivex.rxjava3.subjects.BehaviorSubject
+import java.math.BigDecimal
 
 interface CalculationViewModelInputs {
     val inputFixedCost: BehaviorSubject<String>
@@ -27,7 +28,7 @@ interface CalculationViewModelOutputs {
 
 class CalculationViewModel : ViewModel(), CalculationViewModelInputs, CalculationViewModelOutputs {
 
-    override val inputFixedCost: BehaviorSubject<String> = BehaviorSubject.createDefault("")
+    override val inputFixedCost: BehaviorSubject<String> = BehaviorSubject.createDefault("5")
     override val inputPercentCost: BehaviorSubject<String> = BehaviorSubject.createDefault("")
 
     override val inputProfitMargin: BehaviorSubject<String> = BehaviorSubject.createDefault("")
@@ -120,7 +121,7 @@ class CalculationViewModel : ViewModel(), CalculationViewModelInputs, Calculatio
                 inputPercentCost,
                 Function3<String, String, String, String> {
                         profitMargin, fixedCost, percentCost ->
-                    "using profitMargin"
+                    calculateMarkupWithProfitMargin(toBigDecimal(profitMargin), toBigDecimal(fixedCost), toBigDecimal(percentCost))
                 })
         )
     }
@@ -131,14 +132,16 @@ class CalculationViewModel : ViewModel(), CalculationViewModelInputs, Calculatio
             inputFixedCost,
             inputPercentCost,
             Function3<String, String, String, String> {
-                salePrice, fixedCost, percentCost -> "using sale price"
+                salePrice, fixedCost, percentCost ->
+                    calculateProfitWithSalePrice(toBigDecimal(salePrice), toBigDecimal(fixedCost), toBigDecimal(percentCost))
             }).mergeWith(
              combineLatest(
                  inputMarkup,
                  inputFixedCost,
                  inputPercentCost,
                  Function3<String, String, String, String> {
-                         markup, fixedCost, percentCost -> "using markup"
+                         markup, fixedCost, percentCost ->
+                     calculateProfitWithMarkup(toBigDecimal(markup), toBigDecimal(fixedCost), toBigDecimal(percentCost))
                  })
             ).mergeWith(
              combineLatest(
@@ -146,7 +149,8 @@ class CalculationViewModel : ViewModel(), CalculationViewModelInputs, Calculatio
                  inputFixedCost,
                  inputPercentCost,
                  Function3<String, String, String, String> {
-                         profitMargin, fixedCost, percentCost -> "using profitMargin"
+                         profitMargin, fixedCost, percentCost ->
+                     calculateProfitWithProfitMargin(toBigDecimal(profitMargin), toBigDecimal(fixedCost), toBigDecimal(percentCost))
                  })
          )
     }
@@ -157,14 +161,21 @@ class CalculationViewModel : ViewModel(), CalculationViewModelInputs, Calculatio
             inputFixedCost,
             inputPercentCost,
             Function3<String, String, String, String> {
-                    salePrice, fixedCost, percentCost -> "using sale price"
+                    salePrice, fixedCost, percentCost ->
+
+                    if(toBigDecimal(salePrice) != BigDecimal.ZERO) {
+                        calculateProfitMarginWithSalePrice(toBigDecimal(salePrice), toBigDecimal(fixedCost), toBigDecimal(percentCost))
+                    }else{
+                        "Infinity"
+                }
             }).mergeWith(
             combineLatest(
                 inputMarkup,
                 inputFixedCost,
                 inputPercentCost,
                 Function3<String, String, String, String> {
-                        markup, fixedCost, percentCost -> "using markup"
+                        markup, fixedCost, percentCost ->
+                    calculateProfitMarginWithMarkup(toBigDecimal(markup), toBigDecimal(fixedCost), toBigDecimal(percentCost))
                 })
         ).mergeWith(
             combineLatest(
@@ -172,50 +183,11 @@ class CalculationViewModel : ViewModel(), CalculationViewModelInputs, Calculatio
                 inputFixedCost,
                 inputPercentCost,
                 Function3<String, String, String, String> {
-                        profit, fixedCost, percentCost -> "using profitMargin"
+                        profit, fixedCost, percentCost ->
+                    calculateProfitMarginWithProfit(toBigDecimal(profit), toBigDecimal(fixedCost), toBigDecimal(percentCost))
                 })
         )
     }
 
     //endregion
-    /*
-    //This needs to be all fixed costs AND all percentage costs. Currently only cost and profit margin
-    override val outputSalePrice: Observable<String> =
-            combineLatest(
-                    inputFixedCost,
-                    inputProfitMargin,
-                    BiFunction {
-                        cost, profitMargin ->
-                        calculateSalePrice(toBigDecimal(cost), toBigDecimal(profitMargin))
-                    })
-
-    //This needs to be all fixed costs. Currently only cost of item
-    override val outputMarkup: Observable<String> =
-            combineLatest(
-                    inputProfit,
-                    inputFixedCost,
-                    BiFunction {
-                        profit, cost ->
-                        calculateMarkup(toBigDecimal(profit), toBigDecimal(cost))
-                    })
-
-    override val outputProfit: Observable<String> =
-        combineLatest(
-            inputSalePrice,
-            inputProfitMargin,
-            BiFunction {
-                    sale, profitMargin ->
-                calculateProfit(toBigDecimal(sale), toBigDecimal(profitMargin))
-            })
-
-    override val outputProfitMargin: Observable<String> =
-        combineLatest(
-            inputProfit,
-            inputSalePrice,
-            BiFunction {
-                    profit, salePrice ->
-                calculateProfitMargin(toBigDecimal(profit), toBigDecimal(salePrice))
-            })
-
-    */
 }

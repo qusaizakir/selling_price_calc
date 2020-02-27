@@ -8,26 +8,6 @@ val _1 = BigDecimal.ONE
 
 //region Calculation Formulae
 
-fun calculateSalePrice(costPrice: BigDecimal, profitMargin: BigDecimal): String {
-    return (costPrice / (_1 - (profitMargin / _100))).setTwoDecimalToString()
-}
-
-fun calculateProfit(salePrice: BigDecimal, profitMargin: BigDecimal): String {
-    return (salePrice*(profitMargin/_100)).setTwoDecimalToString()
-}
-
-fun calculateProfitMargin(profit: BigDecimal, salePrice: BigDecimal): String {
-    return ((profit/ salePrice) * _100).setTwoDecimalToString()
-}
-
-fun calculateMarkup(profit: BigDecimal, costPrice: BigDecimal): String {
-    return  ((profit / costPrice) * _100).setTwoDecimalToString()
-}
-
-
-
-
-
 fun calculateSalePriceWithMarkup(markup: BigDecimal, fixedCost: BigDecimal, percentCost: BigDecimal): String {
     return (((markup * fixedCost) / _100) + fixedCost).setTwoDecimalToString()
 }
@@ -37,9 +17,8 @@ fun calculateSalePriceWithProfit(profit: BigDecimal, fixedCost: BigDecimal, perc
 }
 
 fun calculateSalePriceWithProfitMargin(profitMargin: BigDecimal, fixedCost: BigDecimal, percentCost: BigDecimal): String {
-    return (fixedCost / (_1 - profitMargin)).setTwoDecimalToString()
+    return (fixedCost / (_1 - (profitMargin/ _100))).setTwoDecimalToString()
 }
-
 
 fun calculateMarkupWithSalePrice(salePrice: BigDecimal, fixedCost: BigDecimal, percentCost: BigDecimal): String {
     return (((salePrice - fixedCost) * _100) / fixedCost).setTwoDecimalToString()
@@ -50,10 +29,32 @@ fun calculateMarkupWithProfit(profit: BigDecimal, fixedCost: BigDecimal, percent
 }
 
 fun calculateMarkupWithProfitMargin(profitMargin: BigDecimal, fixedCost: BigDecimal, percentCost: BigDecimal): String {
-    return
+    return (((_1 / (_1 - (profitMargin / _100)))-_1)*_100).setTwoDecimalToString()
 }
 
+fun calculateProfitWithSalePrice(salePrice: BigDecimal, fixedCost: BigDecimal, percentCost: BigDecimal): String {
+    return (salePrice - fixedCost).setTwoDecimalToString()
+}
 
+fun calculateProfitWithMarkup(markup: BigDecimal, fixedCost: BigDecimal, percentCost: BigDecimal): String {
+    return ((fixedCost * (_1 + (markup / _100))) - fixedCost).setTwoDecimalToString()
+}
+
+fun calculateProfitWithProfitMargin(profitMargin: BigDecimal, fixedCost: BigDecimal, percentCost: BigDecimal): String {
+    return ((fixedCost / (_1 - (profitMargin/ _100))) * (profitMargin / _100)).setTwoDecimalToString()
+}
+
+fun calculateProfitMarginWithSalePrice(salePrice: BigDecimal, fixedCost: BigDecimal, percentCost: BigDecimal): String {
+    return (_1 - (fixedCost / salePrice)).setTwoDecimalToString()
+}
+
+fun calculateProfitMarginWithMarkup(markup: BigDecimal, fixedCost: BigDecimal, percentCost: BigDecimal): String {
+    return (((fixedCost * (_1 + (markup / _100))) - fixedCost) / (fixedCost * (_1 + (markup / _100))) * _100).setTwoDecimalToString()
+}
+
+fun calculateProfitMarginWithProfit(profit: BigDecimal, fixedCost: BigDecimal, percentCost: BigDecimal): String {
+    return ((profit / (fixedCost + profit)) * _100).setTwoDecimalToString()
+}
 
 //endregion
 
