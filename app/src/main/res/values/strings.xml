@@ -3,9 +3,9 @@
     <string name="cost_price">Cost Price</string>
     <string name="profit_margin">Profit Margin</string>
     <string name="sale_price">Sale Price</string>
-    <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="markup">Markup</string>
     <string name="profit">Profit</string>
     <string name="percentage_cost">Percentage Cost</string>
+    <string name="profit_margin_error">Profit Margin should be between 0 to 100%</string>
 </resources>

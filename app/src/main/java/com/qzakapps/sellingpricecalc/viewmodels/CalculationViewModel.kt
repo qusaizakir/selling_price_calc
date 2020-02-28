@@ -6,59 +6,72 @@ import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.core.Observable.combineLatest
 import io.reactivex.rxjava3.functions.Function3
 import io.reactivex.rxjava3.subjects.BehaviorSubject
+import io.reactivex.rxjava3.subjects.PublishSubject
 import java.math.BigDecimal
 
 interface CalculationViewModelInputs {
-    val inputFixedCost: BehaviorSubject<String>
-    val inputPercentCost: BehaviorSubject<String>
+    val fixedCost: BehaviorSubject<BigDecimal>
+    val percentCost: BehaviorSubject<BigDecimal>
 
-    val inputProfitMargin: BehaviorSubject<String>
-    val inputSalePrice: BehaviorSubject<String>
-    val inputProfit: BehaviorSubject<String>
-    val inputMarkup: BehaviorSubject<String>
+    val profitMargin: BehaviorSubject<BigDecimal>
+    val salePrice: BehaviorSubject<BigDecimal>
+    val profit: BehaviorSubject<BigDecimal>
+    val markup: BehaviorSubject<BigDecimal>
 
 }
 
 interface CalculationViewModelOutputs {
-    fun outputSalePrice(): Observable<String>
-    fun outputMarkup(): Observable<String>
-    fun outputProfit(): Observable<String>
-    fun outputProfitMargin(): Observable<String>
+    fun salePrice(): Observable<String>
+    fun markup(): Observable<String>
+    fun profit(): Observable<String>
+    fun profitMargin(): Observable<String>
+
+    val profitMarginError: PublishSubject<Boolean>
 }
 
 class CalculationViewModel : ViewModel(), CalculationViewModelInputs, CalculationViewModelOutputs {
 
-    override val inputFixedCost: BehaviorSubject<String> = BehaviorSubject.createDefault("5")
-    override val inputPercentCost: BehaviorSubject<String> = BehaviorSubject.createDefault("")
+    override val fixedCost: BehaviorSubject<BigDecimal> = BehaviorSubject.create()
+    override val percentCost: BehaviorSubject<BigDecimal> = BehaviorSubject.create()
 
-    override val inputProfitMargin: BehaviorSubject<String> = BehaviorSubject.createDefault("")
-    override val inputSalePrice: BehaviorSubject<String> = BehaviorSubject.createDefault("")
-    override val inputProfit: BehaviorSubject<String> = BehaviorSubject.createDefault("")
-    override val inputMarkup: BehaviorSubject<String> = BehaviorSubject.createDefault("")
+    override val profitMargin: BehaviorSubject<BigDecimal> = BehaviorSubject.create()
+    override val salePrice: BehaviorSubject<BigDecimal> = BehaviorSubject.create()
+    override val profit: BehaviorSubject<BigDecimal> = BehaviorSubject.create()
+    override val markup: BehaviorSubject<BigDecimal> = BehaviorSubject.create()
+
+    override val profitMarginError: PublishSubject<Boolean> = PublishSubject.create()
+
+    val  inputs: CalculationViewModelInputs = this
+    val outputs: CalculationViewModelOutputs = this
 
     //region inputs
     fun onFixedCostTextChange(text: String){
-        inputFixedCost.onNext(text)
+        fixedCost.onNext(toBigDecimal(text))
     }
 
     fun onPercentCostTextChange(text: String){
-        inputPercentCost.onNext(text)
+        percentCost.onNext(toBigDecimal(text))
     }
 
-    fun onProfitMarginTextChange(text: String){
-        inputProfitMargin.onNext(text)
+    fun onProfitMarginTextChange(text: String) {
+        takeIf{
+            toBigDecimal(text).let { it <= _100 && it >= _0 }
+        }?.let {
+            profitMargin.onNext(toBigDecimal(text))
+            profitMarginError.onNext(false)
+        } ?: profitMarginError.onNext(true)
     }
 
     fun onSalePriceTextChange(text: String){
-        inputSalePrice.onNext(text)
+        salePrice.onNext(toBigDecimal(text))
     }
 
     fun onProfitTextChange(text: String){
-        inputProfit.onNext(text)
+        profit.onNext(toBigDecimal(text))
     }
 
     fun onMarkupTextChange(text: String){
-        inputMarkup.onNext(text)
+        markup.onNext(toBigDecimal(text))
     }
 
     //endregion
@@ -68,124 +81,130 @@ class CalculationViewModel : ViewModel(), CalculationViewModelInputs, Calculatio
     Each output will be triggered by user typing on one of the other 3 outputs.
     E.g Sale price will be triggered by either Markup, Profit or Profit Margin being changed.
     */
-    override fun outputSalePrice(): Observable<String> {
+    override fun salePrice(): Observable<String> {
         return combineLatest(
-            inputMarkup,
-            inputFixedCost,
-            inputPercentCost,
-            Function3<String, String, String, String> {
+            markup,
+            fixedCost,
+            percentCost,
+            Function3<BigDecimal, BigDecimal, BigDecimal, String> {
                     markup, fixedCost, percentCost ->
-                calculateSalePriceWithMarkup(toBigDecimal(markup), toBigDecimal(fixedCost), toBigDecimal(percentCost))
+                calculateSalePriceWithMarkup(markup, fixedCost, percentCost)
             }).mergeWith(
             combineLatest(
-                inputProfit,
-                inputFixedCost,
-                inputPercentCost,
-                Function3<String, String, String, String> {
+                profit,
+                fixedCost,
+                percentCost,
+                Function3<BigDecimal, BigDecimal, BigDecimal, String> {
                         profit, fixedCost, percentCost ->
-                    calculateSalePriceWithProfit(toBigDecimal(profit), toBigDecimal(fixedCost), toBigDecimal(percentCost))
+                    calculateSalePriceWithProfit(profit, fixedCost, percentCost)
                 })
         ).mergeWith(
             combineLatest(
-                inputProfitMargin,
-                inputFixedCost,
-                inputPercentCost,
-                Function3<String, String, String, String> {
+                profitMargin,
+                fixedCost,
+                percentCost,
+                Function3<BigDecimal, BigDecimal, BigDecimal, String> {
                         profitMargin, fixedCost, percentCost ->
-                    calculateSalePriceWithProfitMargin(toBigDecimal(profitMargin), toBigDecimal(fixedCost), toBigDecimal(percentCost))
+                    calculateSalePriceWithProfitMargin(profitMargin, fixedCost, percentCost)
                 })
         )
     }
 
-    override fun outputMarkup(): Observable<String> {
+    override fun markup(): Observable<String> {
         return combineLatest(
-            inputSalePrice,
-            inputFixedCost,
-            inputPercentCost,
-            Function3<String, String, String, String> {
+            salePrice,
+            fixedCost,
+            percentCost,
+            Function3<BigDecimal, BigDecimal, BigDecimal, String> {
                     salePrice, fixedCost, percentCost ->
-                calculateMarkupWithSalePrice(toBigDecimal(salePrice), toBigDecimal(fixedCost), toBigDecimal(percentCost))
+
+                if(salePrice != BigDecimal.ZERO) calculateMarkupWithSalePrice(salePrice, fixedCost, percentCost)
+                else "Infinity"
+
             }).mergeWith(
             combineLatest(
-                inputProfit,
-                inputFixedCost,
-                inputPercentCost,
-                Function3<String, String, String, String> {
+                profit,
+                fixedCost,
+                percentCost,
+                Function3<BigDecimal, BigDecimal, BigDecimal, String> {
                         profit, fixedCost, percentCost ->
-                    calculateMarkupWithProfit(toBigDecimal(profit), toBigDecimal(fixedCost), toBigDecimal(percentCost))
+                    if(fixedCost != BigDecimal.ZERO) calculateMarkupWithProfit(profit, fixedCost, percentCost)
+                    else "Infinity"
                 })
         ).mergeWith(
             combineLatest(
-                inputProfitMargin,
-                inputFixedCost,
-                inputPercentCost,
-                Function3<String, String, String, String> {
+                profitMargin,
+                fixedCost,
+                percentCost,
+                Function3<BigDecimal, BigDecimal, BigDecimal, String> {
                         profitMargin, fixedCost, percentCost ->
-                    calculateMarkupWithProfitMargin(toBigDecimal(profitMargin), toBigDecimal(fixedCost), toBigDecimal(percentCost))
+                    calculateMarkupWithProfitMargin(profitMargin, fixedCost, percentCost)
                 })
         )
     }
 
-    override fun outputProfit(): Observable<String> {
+    override fun profit(): Observable<String> {
          return combineLatest(
-            inputSalePrice,
-            inputFixedCost,
-            inputPercentCost,
-            Function3<String, String, String, String> {
+            salePrice,
+            fixedCost,
+            percentCost,
+            Function3<BigDecimal, BigDecimal, BigDecimal, String> {
                 salePrice, fixedCost, percentCost ->
-                    calculateProfitWithSalePrice(toBigDecimal(salePrice), toBigDecimal(fixedCost), toBigDecimal(percentCost))
+                    calculateProfitWithSalePrice(salePrice, fixedCost, percentCost)
             }).mergeWith(
              combineLatest(
-                 inputMarkup,
-                 inputFixedCost,
-                 inputPercentCost,
-                 Function3<String, String, String, String> {
+                 markup,
+                 fixedCost,
+                 percentCost,
+                 Function3<BigDecimal, BigDecimal, BigDecimal, String> {
                          markup, fixedCost, percentCost ->
-                     calculateProfitWithMarkup(toBigDecimal(markup), toBigDecimal(fixedCost), toBigDecimal(percentCost))
+                     calculateProfitWithMarkup(markup, fixedCost, percentCost)
                  })
             ).mergeWith(
              combineLatest(
-                 inputProfitMargin,
-                 inputFixedCost,
-                 inputPercentCost,
-                 Function3<String, String, String, String> {
+                 profitMargin,
+                 fixedCost,
+                 percentCost,
+                 Function3<BigDecimal, BigDecimal, BigDecimal, String> {
                          profitMargin, fixedCost, percentCost ->
-                     calculateProfitWithProfitMargin(toBigDecimal(profitMargin), toBigDecimal(fixedCost), toBigDecimal(percentCost))
+                     calculateProfitWithProfitMargin(profitMargin, fixedCost, percentCost)
                  })
          )
     }
 
-    override fun outputProfitMargin(): Observable<String> {
+    override fun profitMargin(): Observable<String> {
         return combineLatest(
-            inputSalePrice,
-            inputFixedCost,
-            inputPercentCost,
-            Function3<String, String, String, String> {
+            salePrice,
+            fixedCost,
+            percentCost,
+            Function3<BigDecimal, BigDecimal, BigDecimal, String> {
                     salePrice, fixedCost, percentCost ->
 
-                    if(toBigDecimal(salePrice) != BigDecimal.ZERO) {
-                        calculateProfitMarginWithSalePrice(toBigDecimal(salePrice), toBigDecimal(fixedCost), toBigDecimal(percentCost))
-                    }else{
-                        "Infinity"
-                }
+                    if(salePrice != BigDecimal.ZERO) calculateProfitMarginWithSalePrice(salePrice, fixedCost, percentCost)
+                    else "Infinity"
+
             }).mergeWith(
             combineLatest(
-                inputMarkup,
-                inputFixedCost,
-                inputPercentCost,
-                Function3<String, String, String, String> {
+                markup,
+                fixedCost,
+                percentCost,
+                Function3<BigDecimal, BigDecimal, BigDecimal, String> {
                         markup, fixedCost, percentCost ->
-                    calculateProfitMarginWithMarkup(toBigDecimal(markup), toBigDecimal(fixedCost), toBigDecimal(percentCost))
-                })
-        ).mergeWith(
-            combineLatest(
-                inputProfit,
-                inputFixedCost,
-                inputPercentCost,
-                Function3<String, String, String, String> {
-                        profit, fixedCost, percentCost ->
-                    calculateProfitMarginWithProfit(toBigDecimal(profit), toBigDecimal(fixedCost), toBigDecimal(percentCost))
-                })
+
+                    if(fixedCost != BigDecimal.ZERO) calculateProfitMarginWithMarkup(markup, fixedCost, percentCost)
+                    else "Infinity"
+
+                })).mergeWith(
+                combineLatest(
+                    profit,
+                    fixedCost,
+                    percentCost,
+                    Function3<BigDecimal, BigDecimal, BigDecimal, String> {
+                            profit, fixedCost, percentCost ->
+
+                        if(fixedCost != BigDecimal.ZERO) calculateProfitMarginWithProfit(profit, fixedCost, percentCost)
+                        else "Infinity"
+                    })
         )
     }
 

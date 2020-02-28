@@ -5,6 +5,7 @@ import java.math.RoundingMode
 
 val _100 = BigDecimal.valueOf(100.0)
 val _1 = BigDecimal.ONE
+val _0 = BigDecimal.ZERO
 
 //region Calculation Formulae
 
@@ -45,7 +46,7 @@ fun calculateProfitWithProfitMargin(profitMargin: BigDecimal, fixedCost: BigDeci
 }
 
 fun calculateProfitMarginWithSalePrice(salePrice: BigDecimal, fixedCost: BigDecimal, percentCost: BigDecimal): String {
-    return (_1 - (fixedCost / salePrice)).setTwoDecimalToString()
+    return ((_1 - (fixedCost / salePrice)) * _100).setTwoDecimalToString()
 }
 
 fun calculateProfitMarginWithMarkup(markup: BigDecimal, fixedCost: BigDecimal, percentCost: BigDecimal): String {
@@ -63,5 +64,5 @@ fun BigDecimal.setTwoDecimalToString(): String {
 }
 
 operator fun BigDecimal.div(other: BigDecimal): BigDecimal {
-    return this.divide(other, 2, RoundingMode.HALF_UP)
+    return this.divide(other, 10, RoundingMode.HALF_UP)
 }
