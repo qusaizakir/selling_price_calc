@@ -26,21 +26,20 @@ class CalculationFragment() : BaseFragment<CalculationViewModel>() {
 
         calculationEtFixedCost.doAfterTextChanged { text -> if(calculationEtFixedCost.hasFocus()) viewModel.onFixedCostTextChange(text.toString())}
         calculationEtPercentageCost.doAfterTextChanged { text -> if(calculationEtPercentageCost.hasFocus()) viewModel.onPercentCostTextChange(text.toString())}
-        calculationEtProfit.doAfterTextChanged { text -> if(calculationEtProfitMargin.hasFocus()) viewModel.onProfitMarginTextChange(text.toString())}
 
+        calculationEtProfitMargin.doAfterTextChanged { text -> if(calculationEtProfitMargin.hasFocus()) viewModel.onProfitMarginTextChange(text.toString())}
         calculationEtSalePrice.doAfterTextChanged { text -> if(calculationEtSalePrice.hasFocus()) viewModel.onSalePriceTextChange(text.toString())}
-        calculationEtProfit.doAfterTextChanged { text -> if(calculationEtProfit.hasFocus())  viewModel.onProfitTextChange(text.toString())}
         calculationEtMarkup.doAfterTextChanged { text -> if(calculationEtMarkup.hasFocus()) viewModel.onMarkupTextChange(text.toString())}
+        calculationEtProfit.doAfterTextChanged { text -> if(calculationEtProfit.hasFocus())  viewModel.onProfitTextChange(text.toString())}
+
+        viewModel.outputs.percentCost().subscribe{t -> calculationEtPercentageCost.setText(t)}.autoDispose()
 
         viewModel.outputs.salePrice().subscribe { t -> calculationEtSalePrice.setText(t)}.autoDispose()
         viewModel.outputs.markup().subscribe { t -> calculationEtMarkup.setText(t)}.autoDispose()
         viewModel.outputs.profit().subscribe { t -> calculationEtProfit.setText(t)}.autoDispose()
         viewModel.outputs.profitMargin().subscribe { t -> calculationEtProfitMargin.setText(t)}.autoDispose()
 
-        viewModel.outputs.profitMarginError.subscribe{showError ->
-            calculationTiProfitMargin.isErrorEnabled = showError
-            calculationTiProfitMargin.error = getString(R.string.profit_margin_error)
-        }
+        viewModel.outputs.profitMarginError.subscribe{showError -> calculationTiProfitMargin.error = if(showError) getString(R.string.profit_margin_error) else "" }
 
 
     }

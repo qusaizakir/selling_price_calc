@@ -10,13 +10,13 @@ import io.reactivex.rxjava3.subjects.PublishSubject
 import java.math.BigDecimal
 
 interface CalculationViewModelInputs {
-    val fixedCost: BehaviorSubject<BigDecimal>
+    val fixedCost: PublishSubject<BigDecimal>
     val percentCost: BehaviorSubject<BigDecimal>
 
-    val profitMargin: BehaviorSubject<BigDecimal>
-    val salePrice: BehaviorSubject<BigDecimal>
-    val profit: BehaviorSubject<BigDecimal>
-    val markup: BehaviorSubject<BigDecimal>
+    val profitMargin: PublishSubject<BigDecimal>
+    val salePrice: PublishSubject<BigDecimal>
+    val profit: PublishSubject<BigDecimal>
+    val markup: PublishSubject<BigDecimal>
 
 }
 
@@ -25,19 +25,20 @@ interface CalculationViewModelOutputs {
     fun markup(): Observable<String>
     fun profit(): Observable<String>
     fun profitMargin(): Observable<String>
+    fun percentCost(): Observable<String>
 
     val profitMarginError: PublishSubject<Boolean>
 }
 
 class CalculationViewModel : ViewModel(), CalculationViewModelInputs, CalculationViewModelOutputs {
 
-    override val fixedCost: BehaviorSubject<BigDecimal> = BehaviorSubject.create()
-    override val percentCost: BehaviorSubject<BigDecimal> = BehaviorSubject.create()
+    override val fixedCost: PublishSubject<BigDecimal> = PublishSubject.create()
+    override val percentCost: BehaviorSubject<BigDecimal> = BehaviorSubject.createDefault(_0)
 
-    override val profitMargin: BehaviorSubject<BigDecimal> = BehaviorSubject.create()
-    override val salePrice: BehaviorSubject<BigDecimal> = BehaviorSubject.create()
-    override val profit: BehaviorSubject<BigDecimal> = BehaviorSubject.create()
-    override val markup: BehaviorSubject<BigDecimal> = BehaviorSubject.create()
+    override val profitMargin: PublishSubject<BigDecimal> = PublishSubject.create()
+    override val salePrice: PublishSubject<BigDecimal> = PublishSubject.create()
+    override val profit: PublishSubject<BigDecimal> = PublishSubject.create()
+    override val markup: PublishSubject<BigDecimal> = PublishSubject.create()
 
     override val profitMarginError: PublishSubject<Boolean> = PublishSubject.create()
 
@@ -54,9 +55,7 @@ class CalculationViewModel : ViewModel(), CalculationViewModelInputs, Calculatio
     }
 
     fun onProfitMarginTextChange(text: String) {
-        takeIf{
-            toBigDecimal(text).let { it <= _100 && it >= _0 }
-        }?.let {
+        takeIf{ toBigDecimal(text).let{ it <= _100 && it >= _0 } }?.let {
             profitMargin.onNext(toBigDecimal(text))
             profitMarginError.onNext(false)
         } ?: profitMarginError.onNext(true)
@@ -77,10 +76,8 @@ class CalculationViewModel : ViewModel(), CalculationViewModelInputs, Calculatio
     //endregion
 
     //region outputs
-    /**
-    Each output will be triggered by user typing on one of the other 3 outputs.
-    E.g Sale price will be triggered by either Markup, Profit or Profit Margin being changed.
-    */
+    override fun percentCost(): Observable<String> = percentCost.map { bd -> bd.toString()}
+
     override fun salePrice(): Observable<String> {
         return combineLatest(
             markup,
@@ -117,10 +114,7 @@ class CalculationViewModel : ViewModel(), CalculationViewModelInputs, Calculatio
             percentCost,
             Function3<BigDecimal, BigDecimal, BigDecimal, String> {
                     salePrice, fixedCost, percentCost ->
-
-                if(salePrice != BigDecimal.ZERO) calculateMarkupWithSalePrice(salePrice, fixedCost, percentCost)
-                else "Infinity"
-
+                calculateMarkupWithSalePrice(salePrice, fixedCost, percentCost)
             }).mergeWith(
             combineLatest(
                 profit,
@@ -128,8 +122,7 @@ class CalculationViewModel : ViewModel(), CalculationViewModelInputs, Calculatio
                 percentCost,
                 Function3<BigDecimal, BigDecimal, BigDecimal, String> {
                         profit, fixedCost, percentCost ->
-                    if(fixedCost != BigDecimal.ZERO) calculateMarkupWithProfit(profit, fixedCost, percentCost)
-                    else "Infinity"
+                    calculateMarkupWithProfit(profit, fixedCost, percentCost)
                 })
         ).mergeWith(
             combineLatest(
@@ -167,7 +160,7 @@ class CalculationViewModel : ViewModel(), CalculationViewModelInputs, Calculatio
                  percentCost,
                  Function3<BigDecimal, BigDecimal, BigDecimal, String> {
                          profitMargin, fixedCost, percentCost ->
-                     calculateProfitWithProfitMargin(profitMargin, fixedCost, percentCost)
+                    calculateProfitWithProfitMargin(profitMargin, fixedCost, percentCost)
                  })
          )
     }
