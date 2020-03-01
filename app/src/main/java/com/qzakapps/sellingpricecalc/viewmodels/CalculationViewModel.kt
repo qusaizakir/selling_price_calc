@@ -5,13 +5,12 @@ import com.qzakapps.sellingpricecalc.helper.*
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.core.Observable.combineLatest
 import io.reactivex.rxjava3.functions.Function3
-import io.reactivex.rxjava3.subjects.BehaviorSubject
 import io.reactivex.rxjava3.subjects.PublishSubject
 import java.math.BigDecimal
 
 interface CalculationViewModelInputs {
     val fixedCost: PublishSubject<BigDecimal>
-    val percentCost: BehaviorSubject<BigDecimal>
+    val percentCost: PublishSubject<BigDecimal>
 
     val profitMargin: PublishSubject<BigDecimal>
     val salePrice: PublishSubject<BigDecimal>
@@ -25,7 +24,7 @@ interface CalculationViewModelOutputs {
     fun markup(): Observable<String>
     fun profit(): Observable<String>
     fun profitMargin(): Observable<String>
-    fun percentCost(): Observable<String>
+    //fun percentCost(): Observable<String>
 
     val profitMarginError: PublishSubject<Boolean>
 }
@@ -33,7 +32,7 @@ interface CalculationViewModelOutputs {
 class CalculationViewModel : ViewModel(), CalculationViewModelInputs, CalculationViewModelOutputs {
 
     override val fixedCost: PublishSubject<BigDecimal> = PublishSubject.create()
-    override val percentCost: BehaviorSubject<BigDecimal> = BehaviorSubject.createDefault(_0)
+    override val percentCost: PublishSubject<BigDecimal> = PublishSubject.create()
 
     override val profitMargin: PublishSubject<BigDecimal> = PublishSubject.create()
     override val salePrice: PublishSubject<BigDecimal> = PublishSubject.create()
@@ -76,7 +75,7 @@ class CalculationViewModel : ViewModel(), CalculationViewModelInputs, Calculatio
     //endregion
 
     //region outputs
-    override fun percentCost(): Observable<String> = percentCost.map { bd -> bd.toString()}
+    //override fun percentCost(): Observable<String> = percentCost.map { bd -> bd.toString()}
 
     override fun salePrice(): Observable<String> {
         return combineLatest(

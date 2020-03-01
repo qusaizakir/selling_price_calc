@@ -32,7 +32,7 @@ class CalculationFragment() : BaseFragment<CalculationViewModel>() {
         calculationEtMarkup.doAfterTextChanged { text -> if(calculationEtMarkup.hasFocus()) viewModel.onMarkupTextChange(text.toString())}
         calculationEtProfit.doAfterTextChanged { text -> if(calculationEtProfit.hasFocus())  viewModel.onProfitTextChange(text.toString())}
 
-        viewModel.outputs.percentCost().subscribe{t -> calculationEtPercentageCost.setText(t)}.autoDispose()
+        //viewModel.outputs.percentCost().subscribe{t -> calculationEtPercentageCost.setText(t)}.autoDispose()
 
         viewModel.outputs.salePrice().subscribe { t -> calculationEtSalePrice.setText(t)}.autoDispose()
         viewModel.outputs.markup().subscribe { t -> calculationEtMarkup.setText(t)}.autoDispose()

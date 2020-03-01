@@ -14,11 +14,11 @@ fun calculateSalePriceWithMarkup(markup: BigDecimal, fixedCost: BigDecimal, perc
 }
 
 fun calculateSalePriceWithProfit(profit: BigDecimal, fixedCost: BigDecimal, percentCost: BigDecimal): String {
-    return checkForDivisionByZero {(profit + fixedCost).setTwoDecimalToString()}
+    return checkForDivisionByZero {((profit + fixedCost) * (_1 + (percentCost/_100))).setTwoDecimalToString()}
 }
 
 fun calculateSalePriceWithProfitMargin(profitMargin: BigDecimal, fixedCost: BigDecimal, percentCost: BigDecimal): String {
-    return checkForDivisionByZero {(fixedCost / (_1 - (profitMargin/ _100))).setTwoDecimalToString()}
+    return checkForDivisionByZero {(fixedCost / (_1 - ((profitMargin + percentCost)/ _100))).setTwoDecimalToString()}
 }
 
 fun calculateMarkupWithSalePrice(salePrice: BigDecimal, fixedCost: BigDecimal, percentCost: BigDecimal): String {
@@ -26,35 +26,35 @@ fun calculateMarkupWithSalePrice(salePrice: BigDecimal, fixedCost: BigDecimal, p
 }
 
 fun calculateMarkupWithProfit(profit: BigDecimal, fixedCost: BigDecimal, percentCost: BigDecimal): String {
-    return checkForDivisionByZero {((profit / fixedCost) * _100).setTwoDecimalToString()}
+    return checkForDivisionByZero {(((((profit + fixedCost) * (_1 + (percentCost/_100))) / fixedCost) - _1) * _100).setTwoDecimalToString()}
 }
 
 fun calculateMarkupWithProfitMargin(profitMargin: BigDecimal, fixedCost: BigDecimal, percentCost: BigDecimal): String {
-    return checkForDivisionByZero {(((_1 / (_1 - (profitMargin / _100)))-_1)*_100).setTwoDecimalToString()}
+    return checkForDivisionByZero {(((_1 / (_1 - ((profitMargin + percentCost) / _100)))-_1)*_100).setTwoDecimalToString()}
 }
 
 fun calculateProfitWithSalePrice(salePrice: BigDecimal, fixedCost: BigDecimal, percentCost: BigDecimal): String {
-    return checkForDivisionByZero {(salePrice - fixedCost).setTwoDecimalToString()}
+    return checkForDivisionByZero {((salePrice * (_1 - (percentCost/_100))) - fixedCost).setTwoDecimalToString()}
 }
 
 fun calculateProfitWithMarkup(markup: BigDecimal, fixedCost: BigDecimal, percentCost: BigDecimal): String {
-    return checkForDivisionByZero {((fixedCost * (_1 + (markup / _100))) - fixedCost).setTwoDecimalToString()}
+    return checkForDivisionByZero {(((fixedCost * (_1 + (markup / _100))) * (_1 - (percentCost/_100))) - fixedCost).setTwoDecimalToString()}
 }
 
 fun calculateProfitWithProfitMargin(profitMargin: BigDecimal, fixedCost: BigDecimal, percentCost: BigDecimal): String {
-    return checkForDivisionByZero {((fixedCost / (_1 - (profitMargin/ _100))) * (profitMargin / _100)).setTwoDecimalToString()}
+    return checkForDivisionByZero {((fixedCost / (_1 - ((profitMargin + percentCost)/ _100))) * (profitMargin / _100)).setTwoDecimalToString()}
 }
 
 fun calculateProfitMarginWithSalePrice(salePrice: BigDecimal, fixedCost: BigDecimal, percentCost: BigDecimal): String {
-    return checkForDivisionByZero {((_1 - (fixedCost / salePrice)) * _100).setTwoDecimalToString()}
+    return checkForDivisionByZero {((_1 - (fixedCost / salePrice) - (percentCost/_100)) * _100).setTwoDecimalToString()}
 }
 
 fun calculateProfitMarginWithMarkup(markup: BigDecimal, fixedCost: BigDecimal, percentCost: BigDecimal): String {
-    return checkForDivisionByZero {(((fixedCost * (_1 + (markup / _100))) - fixedCost) / (fixedCost * (_1 + (markup / _100))) * _100).setTwoDecimalToString()}
+    return checkForDivisionByZero {((((fixedCost * (_1 + (markup / _100))) - fixedCost) / (fixedCost * (_1 + (markup / _100))) * _100) - percentCost).setTwoDecimalToString()}
 }
 
 fun calculateProfitMarginWithProfit(profit: BigDecimal, fixedCost: BigDecimal, percentCost: BigDecimal): String {
-    return checkForDivisionByZero {((profit / (fixedCost + profit)) * _100).setTwoDecimalToString()}
+    return checkForDivisionByZero {((profit / ((fixedCost + profit) * (_1 + (percentCost/_100)))) * _100).setTwoDecimalToString()}
 }
 
 //endregion
