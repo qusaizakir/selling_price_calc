@@ -1,17 +1,19 @@
 <resources>
     <!-- Base application theme. -->
-    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+    <style name="AppTheme" parent="Theme.MaterialComponents.Light.DarkActionBar">
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
     <style name="EditTextCalc" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
-        <item name="layout_constraintStart_toStartOf">parent</item>
-        <item name="layout_constraintEnd_toEndOf">parent</item>
         <item name="android:layout_marginStart">@dimen/calculation_start_margin</item>
         <item name="android:layout_marginEnd">@dimen/calculation_end_margin</item>
         <item name="errorEnabled">true</item>
     </style>
 
+    <style name="TitleText" parent="TextAppearance.MaterialComponents.Headline1">
+        <item name="android:textSize">32sp</item>
+        <item name="android:fontFamily">@font/open_sans</item>
+    </style>
 </resources>

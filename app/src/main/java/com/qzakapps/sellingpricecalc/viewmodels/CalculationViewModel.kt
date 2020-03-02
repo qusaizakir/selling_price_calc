@@ -24,7 +24,6 @@ interface CalculationViewModelOutputs {
     fun markup(): Observable<String>
     fun profit(): Observable<String>
     fun profitMargin(): Observable<String>
-    //fun percentCost(): Observable<String>
 
     val profitMarginError: PublishSubject<Boolean>
 }
@@ -41,7 +40,6 @@ class CalculationViewModel : ViewModel(), CalculationViewModelInputs, Calculatio
 
     override val profitMarginError: PublishSubject<Boolean> = PublishSubject.create()
 
-    val  inputs: CalculationViewModelInputs = this
     val outputs: CalculationViewModelOutputs = this
 
     //region inputs
@@ -75,7 +73,6 @@ class CalculationViewModel : ViewModel(), CalculationViewModelInputs, Calculatio
     //endregion
 
     //region outputs
-    //override fun percentCost(): Observable<String> = percentCost.map { bd -> bd.toString()}
 
     override fun salePrice(): Observable<String> {
         return combineLatest(
