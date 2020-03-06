@@ -10,17 +10,42 @@
         android:layout_height="0dp"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/calculationCostAddCostButton"/>
+        app:layout_constraintBottom_toTopOf="@id/calculationCostNameTi"/>
 
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/calculationCostAddCostButton"
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/calculationCostNameTi"
+        style="@style/EditTextCalc"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/calculationCostTi"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:hint="Name">
+
+    <com.google.android.material.textfield.TextInputEditText
+        android:id="@+id/calculationCostNameEt"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Add Cost"
-        android:layout_margin="8dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"/>
+        android:inputType="text" />
 
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/calculationCostTi"
+        style="@style/EditTextCalc"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/calculationCostNameTi"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:hint="@string/cost_price">
+
+    <com.google.android.material.textfield.TextInputEditText
+        android:id="@+id/calculationCostEt"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:inputType="numberDecimal" />
+
+    </com.google.android.material.textfield.TextInputLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

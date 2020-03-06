@@ -6,14 +6,15 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.qzakapps.sellingpricecalc.R
 import com.qzakapps.sellingpricecalc.models.CostModel
+import com.qzakapps.sellingpricecalc.models.PercentageModel
 import kotlinx.android.synthetic.main.calculation_cost_recycler_item.view.*
 
-class CalculationCostRecyclerAdapter (private val dataList: MutableList<CostModel> = mutableListOf()) : RecyclerView.Adapter<CalculationCostRecyclerAdapter.TitleNumberViewHolder>() {
+class CalculationPercentageRecyclerAdapter (private val dataList: MutableList<PercentageModel> = mutableListOf()) : RecyclerView.Adapter<CalculationPercentageRecyclerAdapter.TitleNumberViewHolder>() {
 
     class TitleNumberViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TitleNumberViewHolder {
-        val view = LayoutInflater.from(parent.context).inflate(R.layout.calculation_cost_recycler_item, parent,false)
+        val view = LayoutInflater.from(parent.context).inflate(R.layout.calculation_percentage_recycler_item, parent,false)
         return TitleNumberViewHolder(view)
     }
 
@@ -26,7 +27,7 @@ class CalculationCostRecyclerAdapter (private val dataList: MutableList<CostMode
 
     override fun getItemCount() = dataList.size
 
-    fun setData(dataList: List<CostModel>){
+    fun setData(dataList: List<PercentageModel>){
         this.dataList.apply {
             clear()
             addAll(dataList)
