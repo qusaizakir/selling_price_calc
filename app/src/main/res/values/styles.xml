@@ -16,4 +16,10 @@
         <item name="android:textSize">32sp</item>
         <item name="android:fontFamily">@font/open_sans</item>
     </style>
+    
+    <style name="CategoryTitleText" parent="MaterialAlertDialog.MaterialComponents.Title.Text">
+        <item name="android:textSize">22sp</item>
+        <item name="android:fontFamily">@font/open_sans</item>
+        <item name="android:textColor">@color/colorGrey</item>
+    </style>
 </resources>

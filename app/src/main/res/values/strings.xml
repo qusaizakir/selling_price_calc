@@ -6,6 +6,12 @@
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="markup">Markup</string>
     <string name="profit">Profit</string>
-    <string name="percentage_cost">Percentage Cost</string>
     <string name="profit_margin_error">Profit Margin should be between 0 to 100%</string>
+    <string name="add_cost">Add Cost</string>
+    <string name="add">Add</string>
+    <string name="cost_name">Cost Name</string>
+    <string name="percentage_name">Percentage Name</string>
+    <string name="percentage_cost">Percentage Cost</string>
+    <string name="cost">Cost</string>
+    <string name="percentage">Percentage</string>
 </resources>

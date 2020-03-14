@@ -6,13 +6,8 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.qzakapps.sellingpricecalc.R
-import com.qzakapps.sellingpricecalc.adapters.CalculationCostRecyclerAdapter
 import com.qzakapps.sellingpricecalc.adapters.CalculationPercentageRecyclerAdapter
-import com.qzakapps.sellingpricecalc.models.CostModel
-import com.qzakapps.sellingpricecalc.models.PercentageModel
-import com.qzakapps.sellingpricecalc.viewmodels.CalculationCostViewModel
 import com.qzakapps.sellingpricecalc.viewmodels.CalculationPercentageViewModel
-import kotlinx.android.synthetic.main.calculation_cost_fragment.*
 import kotlinx.android.synthetic.main.calculation_percentage_fragment.*
 
 class CalculationPercentageFragment : BaseFragment<CalculationPercentageViewModel>() {
@@ -37,8 +32,6 @@ class CalculationPercentageFragment : BaseFragment<CalculationPercentageViewMode
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-
-        calculationPercentageAddPercentageButton.setOnClickListener { viewModel.inputs.addPercentageModelBtnClick(PercentageModel("Perc String", "20.00"))}
 
         viewModel.outputs.percentageModelList().subscribe { percentageCostModel -> calculationPercentageRecyclerAdapter.setData(percentageCostModel) }.autoDispose()
     }

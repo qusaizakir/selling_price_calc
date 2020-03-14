@@ -7,7 +7,6 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.qzakapps.sellingpricecalc.R
 import com.qzakapps.sellingpricecalc.adapters.CalculationCostRecyclerAdapter
-import com.qzakapps.sellingpricecalc.models.CostModel
 import com.qzakapps.sellingpricecalc.viewmodels.CalculationCostViewModel
 import kotlinx.android.synthetic.main.calculation_cost_fragment.*
 
@@ -33,8 +32,6 @@ class CalculationCostFragment : BaseFragment<CalculationCostViewModel>() {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-
-        calculationCostAddCostButton.setOnClickListener { viewModel.inputs.addCostModelBtnClick(CostModel("Test String", "20.00")) }
 
         viewModel.outputs.costModelList().subscribe { costModelList -> calculationCostRecyclerAdapter.setData(costModelList) }.autoDispose()
     }
