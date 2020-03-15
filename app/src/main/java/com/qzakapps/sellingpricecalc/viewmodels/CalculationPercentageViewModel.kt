@@ -1,39 +1,38 @@
 package com.qzakapps.sellingpricecalc.viewmodels
 
-import androidx.lifecycle.ViewModel
-import com.qzakapps.sellingpricecalc.helper.*
-import com.qzakapps.sellingpricecalc.models.CostModel
-import com.qzakapps.sellingpricecalc.models.PercentageModel
-import io.reactivex.rxjava3.core.Observable
-import io.reactivex.rxjava3.core.Observable.combineLatest
-import io.reactivex.rxjava3.functions.Function3
-import io.reactivex.rxjava3.subjects.BehaviorSubject
-import io.reactivex.rxjava3.subjects.PublishSubject
-import java.math.BigDecimal
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
+import com.qzakapps.sellingpricecalc.database.AppDatabase
+import com.qzakapps.sellingpricecalc.models.Percentage
+import com.qzakapps.sellingpricecalc.repositories.Repository
+import io.reactivex.Flowable
 
 interface CalculationPercentageViewModelInputs {
-    fun addPercentageModelBtnClick(percentageModel: PercentageModel)
 }
 
 interface CalculationPercentageViewModelOutputs {
-    fun percentageModelList(): BehaviorSubject<List<PercentageModel>>
+    fun percentageList(): Flowable<List<Percentage>>
 }
 
-class CalculationPercentageViewModel: ViewModel(), CalculationPercentageViewModelInputs, CalculationPercentageViewModelOutputs {
+class CalculationPercentageViewModel(application: Application): AndroidViewModel(application), CalculationPercentageViewModelInputs, CalculationPercentageViewModelOutputs {
 
-    private val percentageModelList: BehaviorSubject<List<PercentageModel>> = BehaviorSubject.createDefault(emptyList())
+    private val repo: Repository
+    init {
+        val costDao = AppDatabase.getDatabase(application).costDao()
+        val percentageDao = AppDatabase.getDatabase(application).percentageDao()
+        repo = Repository(costDao, percentageDao)
+    }
+
+    private val percentageList: Flowable<List<Percentage>> = repo.getAllPercentage
 
     var inputs: CalculationPercentageViewModelInputs = this
     var outputs: CalculationPercentageViewModelOutputs = this
 
     //region inputs
-    override fun addPercentageModelBtnClick(percentageModel: PercentageModel) {
-        percentageModelList.onNext(percentageModelList.value.plus(percentageModel))
-    }
     //endregion
 
     //region outputs
-    override fun percentageModelList() = percentageModelList
+    override fun percentageList() = percentageList
     //endregion
 
 

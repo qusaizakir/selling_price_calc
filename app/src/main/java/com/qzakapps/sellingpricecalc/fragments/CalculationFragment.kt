@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.core.widget.doAfterTextChanged
 import com.google.android.material.tabs.TabLayoutMediator
 import com.qzakapps.sellingpricecalc.R
@@ -40,22 +41,31 @@ class CalculationFragment() : BaseFragment<CalculationViewModel>() {
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
-        //Take as list from the viewpager
+        calculationCostNameEt.doAfterTextChanged { text -> viewModel.onCostNameTextChange(text.toString())}
+        calculationCostValueEt.doAfterTextChanged { text -> viewModel.onCostValueTextChange(text.toString())}
+        calculationPercentageNameEt.doAfterTextChanged { text -> viewModel.onPercentageNameTextChange(text.toString())}
+        calculationPercentageValueEt.doAfterTextChanged { text -> viewModel.onPercentageValueTextChange(text.toString())}
 
-        //calculationEtFixedCost.doAfterTextChanged { text -> if(calculationEtFixedCost.hasFocus()) viewModel.onFixedCostTextChange(text.toString())}
-        //calculationEtPercentageCost.doAfterTextChanged { text -> if(calculationEtPercentageCost.hasFocus()) viewModel.onPercentCostTextChange(text.toString())}
+        calculationAddCostBtn.setOnClickListener { viewModel.onAddCostBtnClicked()}
+        calculationAddPercentageBtn.setOnClickListener { viewModel.onAddPercentageBtnClicked()}
 
-        calculationEtProfitMargin.doAfterTextChanged { text -> if(calculationEtProfitMargin.hasFocus()) viewModel.onProfitMarginTextChange(text.toString())}
-        calculationEtSalePrice.doAfterTextChanged { text -> if(calculationEtSalePrice.hasFocus()) viewModel.onSalePriceTextChange(text.toString())}
-        calculationEtMarkup.doAfterTextChanged { text -> if(calculationEtMarkup.hasFocus()) viewModel.onMarkupTextChange(text.toString())}
-        calculationEtProfit.doAfterTextChanged { text -> if(calculationEtProfit.hasFocus())  viewModel.onProfitTextChange(text.toString())}
+        calculationProfitMarginEt.doAfterTextChanged { text -> if(calculationProfitMarginEt.hasFocus()) viewModel.onProfitMarginTextChange(text.toString())}
+        calculationSalePriceEt.doAfterTextChanged { text -> if(calculationSalePriceEt.hasFocus()) viewModel.onSalePriceTextChange(text.toString())}
+        calculationMarkupEt.doAfterTextChanged { text -> if(calculationMarkupEt.hasFocus()) viewModel.onMarkupTextChange(text.toString())}
+        calculationProfitEt.doAfterTextChanged { text -> if(calculationProfitEt.hasFocus())  viewModel.onProfitTextChange(text.toString())}
 
-        viewModel.outputs.salePrice().subscribe { t -> calculationEtSalePrice.setText(t)}.autoDispose()
-        viewModel.outputs.markup().subscribe { t -> calculationEtMarkup.setText(t)}.autoDispose()
-        viewModel.outputs.profit().subscribe { t -> calculationEtProfit.setText(t)}.autoDispose()
-        viewModel.outputs.profitMargin().subscribe { t -> calculationEtProfitMargin.setText(t)}.autoDispose()
+        viewModel.outputs.costBtnEnabled().subscribe {enabled -> calculationAddCostBtn.isEnabled = enabled}.autoDispose()
+        viewModel.outputs.percentageBtnEnabled().subscribe {enabled -> calculationAddPercentageBtn.isEnabled = enabled}.autoDispose()
 
-        viewModel.outputs.profitMarginError.subscribe{showError -> calculationTiProfitMargin.error = if(showError) getString(R.string.profit_margin_error) else "" }
+        viewModel.outputs.insertCost().subscribe { Toast.makeText(context, "Cost Added", Toast.LENGTH_SHORT).show()}.autoDispose()
+        viewModel.outputs.insertPercentage().subscribe { Toast.makeText(context, "Percentage Added", Toast.LENGTH_SHORT).show()}.autoDispose()
+
+        viewModel.outputs.salePrice().subscribe { t -> calculationSalePriceEt.setText(t)}.autoDispose()
+        viewModel.outputs.markup().subscribe { t -> calculationMarkupEt.setText(t)}.autoDispose()
+        viewModel.outputs.profit().subscribe { t -> calculationProfitEt.setText(t)}.autoDispose()
+        viewModel.outputs.profitMargin().subscribe { t -> calculationProfitMarginEt.setText(t)}.autoDispose()
+
+        viewModel.outputs.profitMarginError.subscribe{showError -> calculationProfitMarginTi.error = if(showError) getString(R.string.profit_margin_error) else "" }.autoDispose()
 
     }
 

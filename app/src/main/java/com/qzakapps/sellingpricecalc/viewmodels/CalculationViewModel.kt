@@ -1,25 +1,44 @@
 package com.qzakapps.sellingpricecalc.viewmodels
 
-import androidx.lifecycle.ViewModel
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
+import com.qzakapps.sellingpricecalc.database.AppDatabase
 import com.qzakapps.sellingpricecalc.helper.*
-import io.reactivex.rxjava3.core.Observable
-import io.reactivex.rxjava3.core.Observable.combineLatest
-import io.reactivex.rxjava3.functions.Function3
-import io.reactivex.rxjava3.subjects.PublishSubject
+import com.qzakapps.sellingpricecalc.models.Cost
+import com.qzakapps.sellingpricecalc.models.Percentage
+import com.qzakapps.sellingpricecalc.repositories.Repository
+import io.reactivex.Observable
+import io.reactivex.Observable.combineLatest
+import io.reactivex.functions.BiFunction
+import io.reactivex.functions.Function3
+import io.reactivex.subjects.BehaviorSubject
+import io.reactivex.subjects.PublishSubject
 import java.math.BigDecimal
 
 interface CalculationViewModelInputs {
-    val fixedCost: PublishSubject<BigDecimal>
-    val percentCost: PublishSubject<BigDecimal>
+    val addCostBtnClicked: PublishSubject<Boolean>
+    val costName: BehaviorSubject<String>
+    val costValue: BehaviorSubject<String>
+
+    val addPercentageBtnClicked: PublishSubject<Boolean>
+    val percentageName: BehaviorSubject<String>
+    val percentageValue: BehaviorSubject<String>
 
     val profitMargin: PublishSubject<BigDecimal>
     val salePrice: PublishSubject<BigDecimal>
     val profit: PublishSubject<BigDecimal>
     val markup: PublishSubject<BigDecimal>
 
+    val fixedCost: PublishSubject<BigDecimal>
+    val percentCost: PublishSubject<BigDecimal>
 }
 
 interface CalculationViewModelOutputs {
+    fun insertCost(): Observable<Unit>
+    fun insertPercentage(): Observable<Unit>
+    fun costBtnEnabled(): Observable<Boolean>
+    fun percentageBtnEnabled(): Observable<Boolean>
+
     fun salePrice(): Observable<String>
     fun markup(): Observable<String>
     fun profit(): Observable<String>
@@ -28,10 +47,25 @@ interface CalculationViewModelOutputs {
     val profitMarginError: PublishSubject<Boolean>
 }
 
-class CalculationViewModel : ViewModel(), CalculationViewModelInputs, CalculationViewModelOutputs {
+class CalculationViewModel(application: Application) : AndroidViewModel(application), CalculationViewModelInputs, CalculationViewModelOutputs {
+
+    private val repo: Repository
+    init {
+        val costDao = AppDatabase.getDatabase(application).costDao()
+        val percentageDao = AppDatabase.getDatabase(application).percentageDao()
+        repo = Repository(costDao, percentageDao)
+    }
 
     override val fixedCost: PublishSubject<BigDecimal> = PublishSubject.create()
     override val percentCost: PublishSubject<BigDecimal> = PublishSubject.create()
+
+    override val addCostBtnClicked: PublishSubject<Boolean> = PublishSubject.create()
+    override val costName: BehaviorSubject<String> = BehaviorSubject.createDefault("")
+    override val costValue: BehaviorSubject<String> = BehaviorSubject.createDefault("")
+
+    override val addPercentageBtnClicked: PublishSubject<Boolean> = PublishSubject.create()
+    override val percentageName: BehaviorSubject<String> = BehaviorSubject.createDefault("")
+    override val percentageValue: BehaviorSubject<String> = BehaviorSubject.createDefault("")
 
     override val profitMargin: PublishSubject<BigDecimal> = PublishSubject.create()
     override val salePrice: PublishSubject<BigDecimal> = PublishSubject.create()
@@ -43,12 +77,28 @@ class CalculationViewModel : ViewModel(), CalculationViewModelInputs, Calculatio
     val outputs: CalculationViewModelOutputs = this
 
     //region inputs
-    fun onFixedCostTextChange(text: String){
-        fixedCost.onNext(toBigDecimal(text))
+    fun onAddCostBtnClicked(){
+        addCostBtnClicked.onNext(true)
     }
 
-    fun onPercentCostTextChange(text: String){
-        percentCost.onNext(toBigDecimal(text))
+    fun onCostNameTextChange(text: String){
+        costName.onNext(text)
+    }
+
+    fun onCostValueTextChange(text: String){
+        costValue.onNext(text)
+    }
+
+    fun onAddPercentageBtnClicked(){
+        addPercentageBtnClicked.onNext(true)
+    }
+
+    fun onPercentageNameTextChange(text: String){
+        percentageName.onNext(text)
+    }
+
+    fun onPercentageValueTextChange(text: String){
+        percentageValue.onNext(text)
     }
 
     fun onProfitMarginTextChange(text: String) {
@@ -72,14 +122,42 @@ class CalculationViewModel : ViewModel(), CalculationViewModelInputs, Calculatio
 
     //endregion
 
-    //region outputs
+    override fun costBtnEnabled(): Observable<Boolean> {
+        return combineLatest(
+            costName,
+            costValue,
+            BiFunction<String, String, Boolean> { name, value -> !(name.isEmpty() && value.isEmpty()) })
+    }
+
+    override fun percentageBtnEnabled(): Observable<Boolean> {
+        return combineLatest(
+            percentageName,
+            percentageValue,
+            BiFunction<String, String, Boolean> { name, value -> !(name.isEmpty() && value.isEmpty()) })
+    }
+
+    override fun insertCost(): Observable<Unit> {
+        return addCostBtnClicked.withLatestFrom(costName, costValue, Function3<Boolean, String, String, Unit>{
+            _, name, value ->
+            val cost = Cost(name = name, cost = value)
+            repo.insertCost(cost)
+        })
+    }
+
+    override fun insertPercentage(): Observable<Unit> {
+        return addPercentageBtnClicked.withLatestFrom(percentageName, percentageValue, Function3<Boolean, String, String, Unit>{
+                _, name, value ->
+            val percentage = Percentage(name = name, cost = value)
+            repo.insertPercentage(percentage)
+        })
+    }
 
     override fun salePrice(): Observable<String> {
         return combineLatest(
             markup,
             fixedCost,
             percentCost,
-            Function3<BigDecimal, BigDecimal, BigDecimal, String> {
+            Function3<BigDecimal, BigDecimal, BigDecimal, String>{
                     markup, fixedCost, percentCost ->
                 calculateSalePriceWithMarkup(markup, fixedCost, percentCost)
             }).mergeWith(

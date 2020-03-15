@@ -8,6 +8,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.qzakapps.sellingpricecalc.R
 import com.qzakapps.sellingpricecalc.adapters.CalculationCostRecyclerAdapter
 import com.qzakapps.sellingpricecalc.viewmodels.CalculationCostViewModel
+import io.reactivex.android.schedulers.AndroidSchedulers
 import kotlinx.android.synthetic.main.calculation_cost_fragment.*
 
 class CalculationCostFragment : BaseFragment<CalculationCostViewModel>() {
@@ -33,6 +34,6 @@ class CalculationCostFragment : BaseFragment<CalculationCostViewModel>() {
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
-        viewModel.outputs.costModelList().subscribe { costModelList -> calculationCostRecyclerAdapter.setData(costModelList) }.autoDispose()
+        viewModel.outputs.costList().observeOn(AndroidSchedulers.mainThread()).subscribe { costModelList -> calculationCostRecyclerAdapter.setData(costModelList) }.autoDispose()
     }
 }

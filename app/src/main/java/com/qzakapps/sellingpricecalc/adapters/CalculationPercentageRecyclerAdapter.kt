@@ -5,11 +5,10 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.qzakapps.sellingpricecalc.R
-import com.qzakapps.sellingpricecalc.models.CostModel
-import com.qzakapps.sellingpricecalc.models.PercentageModel
+import com.qzakapps.sellingpricecalc.models.Percentage
 import kotlinx.android.synthetic.main.calculation_cost_recycler_item.view.*
 
-class CalculationPercentageRecyclerAdapter (private val dataList: MutableList<PercentageModel> = mutableListOf()) : RecyclerView.Adapter<CalculationPercentageRecyclerAdapter.TitleNumberViewHolder>() {
+class CalculationPercentageRecyclerAdapter (private val dataList: MutableList<Percentage> = mutableListOf()) : RecyclerView.Adapter<CalculationPercentageRecyclerAdapter.TitleNumberViewHolder>() {
 
     class TitleNumberViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView)
 
@@ -20,14 +19,14 @@ class CalculationPercentageRecyclerAdapter (private val dataList: MutableList<Pe
 
     override fun onBindViewHolder(holder: TitleNumberViewHolder, position: Int) {
         dataList[position].run {
-            holder.itemView.titleTextView.text = title
+            holder.itemView.titleTextView.text = name
             holder.itemView.numberTextView.text = cost
         }
     }
 
     override fun getItemCount() = dataList.size
 
-    fun setData(dataList: List<PercentageModel>){
+    fun setData(dataList: List<Percentage>){
         this.dataList.apply {
             clear()
             addAll(dataList)

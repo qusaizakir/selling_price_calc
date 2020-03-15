@@ -5,10 +5,10 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.qzakapps.sellingpricecalc.R
-import com.qzakapps.sellingpricecalc.models.CostModel
+import com.qzakapps.sellingpricecalc.models.Cost
 import kotlinx.android.synthetic.main.calculation_cost_recycler_item.view.*
 
-class CalculationCostRecyclerAdapter (private val dataList: MutableList<CostModel> = mutableListOf()) : RecyclerView.Adapter<CalculationCostRecyclerAdapter.TitleNumberViewHolder>() {
+class CalculationCostRecyclerAdapter (private val dataList: MutableList<Cost> = mutableListOf()) : RecyclerView.Adapter<CalculationCostRecyclerAdapter.TitleNumberViewHolder>() {
 
     class TitleNumberViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView)
 
@@ -19,14 +19,14 @@ class CalculationCostRecyclerAdapter (private val dataList: MutableList<CostMode
 
     override fun onBindViewHolder(holder: TitleNumberViewHolder, position: Int) {
         dataList[position].run {
-            holder.itemView.titleTextView.text = title
+            holder.itemView.titleTextView.text = name
             holder.itemView.numberTextView.text = cost
         }
     }
 
     override fun getItemCount() = dataList.size
 
-    fun setData(dataList: List<CostModel>){
+    fun setData(dataList: List<Cost>){
         this.dataList.apply {
             clear()
             addAll(dataList)

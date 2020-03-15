@@ -1,32 +1,38 @@
 package com.qzakapps.sellingpricecalc.viewmodels
 
-import androidx.lifecycle.ViewModel
-import com.qzakapps.sellingpricecalc.models.CostModel
-import io.reactivex.rxjava3.subjects.BehaviorSubject
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
+import com.qzakapps.sellingpricecalc.database.AppDatabase
+import com.qzakapps.sellingpricecalc.models.Cost
+import com.qzakapps.sellingpricecalc.repositories.Repository
+import io.reactivex.Flowable
 
 interface CalculationCostViewModelInputs {
-    fun addCostModelBtnClick(costModel: CostModel)
 }
 
 interface CalculationCostViewModelOutputs {
-    fun costModelList(): BehaviorSubject<List<CostModel>>
+    fun costList(): Flowable<List<Cost>>
 }
 
-class CalculationCostViewModel : ViewModel(), CalculationCostViewModelInputs, CalculationCostViewModelOutputs {
+class CalculationCostViewModel(application: Application) : AndroidViewModel(application), CalculationCostViewModelInputs, CalculationCostViewModelOutputs {
 
-    private val costModelList: BehaviorSubject<List<CostModel>> = BehaviorSubject.createDefault(emptyList())
+    private val repo: Repository
+    init {
+        val costDao = AppDatabase.getDatabase(application).costDao()
+        val percentageDao = AppDatabase.getDatabase(application).percentageDao()
+        repo = Repository(costDao, percentageDao)
+    }
+
+    private val costList: Flowable<List<Cost>> = repo.getAllCost
 
     var inputs: CalculationCostViewModelInputs = this
     var outputs: CalculationCostViewModelOutputs = this
 
     //region inputs
-    override fun addCostModelBtnClick(costModel: CostModel) {
-        costModelList.onNext(costModelList.value.plus(costModel))
-    }
     //endregion
 
     //region outputs
-    override fun costModelList() = costModelList
+    override fun costList() = costList
     //endregion
 
 

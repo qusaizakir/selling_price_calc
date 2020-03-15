@@ -8,6 +8,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.qzakapps.sellingpricecalc.R
 import com.qzakapps.sellingpricecalc.adapters.CalculationPercentageRecyclerAdapter
 import com.qzakapps.sellingpricecalc.viewmodels.CalculationPercentageViewModel
+import io.reactivex.android.schedulers.AndroidSchedulers
 import kotlinx.android.synthetic.main.calculation_percentage_fragment.*
 
 class CalculationPercentageFragment : BaseFragment<CalculationPercentageViewModel>() {
@@ -33,6 +34,6 @@ class CalculationPercentageFragment : BaseFragment<CalculationPercentageViewMode
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
-        viewModel.outputs.percentageModelList().subscribe { percentageCostModel -> calculationPercentageRecyclerAdapter.setData(percentageCostModel) }.autoDispose()
+        viewModel.outputs.percentageList().observeOn(AndroidSchedulers.mainThread()).subscribe { percentageCostModel -> calculationPercentageRecyclerAdapter.setData(percentageCostModel) }.autoDispose()
     }
 }
