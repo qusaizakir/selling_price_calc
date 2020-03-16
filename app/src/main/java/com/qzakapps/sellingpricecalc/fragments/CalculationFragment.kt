@@ -65,6 +65,9 @@ class CalculationFragment() : BaseFragment<CalculationViewModel>() {
         viewModel.outputs.profit().subscribe { t -> calculationProfitEt.setText(t)}.autoDispose()
         viewModel.outputs.profitMargin().subscribe { t -> calculationProfitMarginEt.setText(t)}.autoDispose()
 
+        viewModel.outputs.displayFixedCost().subscribe { t -> calculationCostTotalTv.text = t}.autoDispose()
+        viewModel.outputs.displayPercentageCost().subscribe { t -> calculationPercentageTotalTv.text = t }.autoDispose()
+
         viewModel.outputs.profitMarginError.subscribe{showError -> calculationProfitMarginTi.error = if(showError) getString(R.string.profit_margin_error) else "" }.autoDispose()
 
     }

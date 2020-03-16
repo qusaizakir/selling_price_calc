@@ -39,6 +39,9 @@ interface CalculationViewModelOutputs {
     fun costBtnEnabled(): Observable<Boolean>
     fun percentageBtnEnabled(): Observable<Boolean>
 
+    fun displayFixedCost(): Observable<String>
+    fun displayPercentageCost(): Observable<String>
+
     fun salePrice(): Observable<String>
     fun markup(): Observable<String>
     fun profit(): Observable<String>
@@ -121,6 +124,24 @@ class CalculationViewModel(application: Application) : AndroidViewModel(applicat
     }
 
     //endregion
+
+    override fun displayFixedCost(): Observable<String> {
+        return repo.getAllCost.map { costList ->
+            var total = BigDecimal.ZERO
+            costList.forEach { cost -> total += toBigDecimal(cost.cost) }
+            fixedCost.onNext(total)
+            return@map total.toString()
+        }
+    }
+
+    override fun displayPercentageCost(): Observable<String> {
+        return repo.getAllPercentage.map { percCost ->
+            var total = BigDecimal.ZERO
+            percCost.forEach { perc -> total += toBigDecimal(perc.cost) }
+            percentCost.onNext(total)
+            return@map total.toString()
+        }
+    }
 
     override fun costBtnEnabled(): Observable<Boolean> {
         return combineLatest(

@@ -5,15 +5,15 @@ import com.qzakapps.sellingpricecalc.dao.PercentageDao
 import com.qzakapps.sellingpricecalc.models.Cost
 import com.qzakapps.sellingpricecalc.models.Percentage
 import io.reactivex.Completable
-import io.reactivex.Flowable
+import io.reactivex.Observable
 import io.reactivex.schedulers.Schedulers
 
 class Repository(
     private val costDao: CostDao,
     private val percentageDao: PercentageDao) {
 
-    val getAllCost: Flowable<List<Cost>> = costDao.getAllCost()
-    val getAllPercentage: Flowable<List<Percentage>> =  percentageDao.getAllPercentage()
+    val getAllCost: Observable<List<Cost>> = costDao.getAllCost()
+    val getAllPercentage: Observable<List<Percentage>> =  percentageDao.getAllPercentage()
 
     fun insertCost(cost: Cost) {
         Completable

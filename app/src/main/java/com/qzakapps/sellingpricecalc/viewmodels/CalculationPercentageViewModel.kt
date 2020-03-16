@@ -5,13 +5,13 @@ import androidx.lifecycle.AndroidViewModel
 import com.qzakapps.sellingpricecalc.database.AppDatabase
 import com.qzakapps.sellingpricecalc.models.Percentage
 import com.qzakapps.sellingpricecalc.repositories.Repository
-import io.reactivex.Flowable
+import io.reactivex.Observable
 
 interface CalculationPercentageViewModelInputs {
 }
 
 interface CalculationPercentageViewModelOutputs {
-    fun percentageList(): Flowable<List<Percentage>>
+    fun percentageList(): Observable<List<Percentage>>
 }
 
 class CalculationPercentageViewModel(application: Application): AndroidViewModel(application), CalculationPercentageViewModelInputs, CalculationPercentageViewModelOutputs {
@@ -23,7 +23,7 @@ class CalculationPercentageViewModel(application: Application): AndroidViewModel
         repo = Repository(costDao, percentageDao)
     }
 
-    private val percentageList: Flowable<List<Percentage>> = repo.getAllPercentage
+    private val percentageList: Observable<List<Percentage>> = repo.getAllPercentage
 
     var inputs: CalculationPercentageViewModelInputs = this
     var outputs: CalculationPercentageViewModelOutputs = this

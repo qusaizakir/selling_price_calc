@@ -11,8 +11,8 @@
         android:layout_height="wrap_content"
         style="@style/CategoryTitleText"
         android:text="@string/cost"
-        android:layout_marginTop="8dp"
-        android:layout_marginStart="8dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginStart="16dp"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"/>
 
@@ -81,8 +81,8 @@
         android:layout_height="wrap_content"
         style="@style/CategoryTitleText"
         android:text="@string/percentage"
-        android:layout_marginTop="8dp"
-        android:layout_marginStart="8dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginStart="16dp"
         app:layout_constraintTop_toBottomOf="@id/calculationCostLL"
         app:layout_constraintStart_toStartOf="parent"/>
 
@@ -163,7 +163,31 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@id/calculationTabLayout"
+        app:layout_constraintBottom_toTopOf="@id/calculationCostTotalTv"/>
+
+
+    <TextView
+        android:id="@+id/calculationCostTotalTv"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        style="@style/TotalText"
+        android:text="test"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/calculationMarkupTi"
+        app:layout_constraintEnd_toStartOf="@id/calculationPercentageTotalTv"/>
+
+    <TextView
+        android:id="@+id/calculationPercentageTotalTv"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        style="@style/TotalText"
+        android:text="teste"
+        app:layout_constraintStart_toEndOf="@id/calculationCostTotalTv"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toTopOf="@id/calculationMarkupTi"/>
+
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/calculationProfitMarginTi"
