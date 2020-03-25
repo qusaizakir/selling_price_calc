@@ -16,11 +16,25 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"/>
 
+    <TextView
+        android:id="@+id/calculationCostContentTv"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginEnd="16dp"
+        style="@style/CategoryContentText"
+        android:text="@string/cost_content"
+        app:layout_constraintTop_toBottomOf="@id/calculationCostTitleTv"
+        app:layout_constraintBottom_toTopOf="@id/calculationCostLL"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
     <LinearLayout
         android:id="@+id/calculationCostLL"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
         android:layout_width="match_parent"
-        app:layout_constraintTop_toBottomOf="@+id/calculationCostTitleTv"
+        app:layout_constraintTop_toBottomOf="@+id/calculationCostContentTv"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         android:gravity="center"
@@ -37,7 +51,7 @@
             android:layout_width="0dp"
             android:layout_weight="1"
             android:layout_marginEnd="4dp"
-            android:hint="@string/cost_name">
+            android:hint="@string/name">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/calculationCostNameEt"
@@ -55,7 +69,7 @@
             android:layout_weight="1"
             android:layout_marginEnd="4dp"
             android:layout_marginStart="4dp"
-            android:hint="@string/cost_price">
+            android:hint="@string/price">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/calculationCostValueEt"
@@ -75,22 +89,50 @@
             android:text="@string/add" />
     </LinearLayout>
 
+    <include
+        android:id="@+id/cost_percentage_divider"
+        android:layout_height="1dp"
+        android:layout_width="match_parent"
+        android:layout_marginTop="16dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        layout="@layout/divider"
+        app:layout_constraintTop_toBottomOf="@id/calculationCostLL"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        />
+
+
     <TextView
         android:id="@+id/calculationPercentageTitleTv"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         style="@style/CategoryTitleText"
-        android:text="@string/percentage"
-        android:layout_marginTop="16dp"
+        android:text="@string/percentage_fee"
         android:layout_marginStart="16dp"
-        app:layout_constraintTop_toBottomOf="@id/calculationCostLL"
+        android:layout_marginTop="8dp"
+        app:layout_constraintTop_toBottomOf="@id/cost_percentage_divider"
         app:layout_constraintStart_toStartOf="parent"/>
+
+    <TextView
+        android:id="@+id/calculationPercentageContentTv"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginEnd="16dp"
+        style="@style/CategoryContentText"
+        android:text="@string/percentage_content"
+        app:layout_constraintTop_toBottomOf="@id/calculationPercentageTitleTv"
+        app:layout_constraintBottom_toTopOf="@id/calculationPercentageLL"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
 
     <LinearLayout
         android:id="@+id/calculationPercentageLL"
         android:layout_height="wrap_content"
         android:layout_width="match_parent"
-        app:layout_constraintTop_toBottomOf="@id/calculationPercentageTitleTv"
+        app:layout_constraintTop_toBottomOf="@id/calculationPercentageContentTv"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         android:gravity="center"
@@ -106,7 +148,7 @@
             android:layout_width="0dp"
             android:layout_weight="1"
             android:layout_marginEnd="4dp"
-            android:hint="@string/percentage_name">
+            android:hint="@string/name">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/calculationPercentageNameEt"
@@ -124,7 +166,7 @@
             android:layout_weight="1"
             android:layout_marginEnd="4dp"
             android:layout_marginStart="4dp"
-            android:hint="@string/percentage_cost">
+            android:hint="@string/price">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/calculationPercentageValueEt"
@@ -144,26 +186,66 @@
             android:text="@string/add" />
     </LinearLayout>
 
-    <com.google.android.material.tabs.TabLayout
-        android:id="@+id/calculationTabLayout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginStart="16dp"
-        app:layout_constraintTop_toBottomOf="@id/calculationPercentageLL"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"/>
-
-    <androidx.viewpager2.widget.ViewPager2
-        android:id="@+id/calculationPager"
-        android:layout_width="match_parent"
+    <LinearLayout
+        android:id="@+id/calculationTabPagerLL"
         android:layout_height="0dp"
+        android:layout_width="match_parent"
         android:layout_margin="16dp"
+        android:orientation="vertical"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/calculationTabLayout"
-        app:layout_constraintBottom_toTopOf="@id/calculationCostTotalTv"/>
+        app:layout_constraintTop_toBottomOf="@id/calculationPercentageLL"
+        app:layout_constraintBottom_toTopOf="@id/calculationCostTotalTitleTv">
+
+        <com.google.android.material.tabs.TabLayout
+            android:id="@+id/calculationTabLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
+        <androidx.viewpager2.widget.ViewPager2
+            android:id="@+id/calculationPager"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"/>
+
+    </LinearLayout>
+
+    <include
+        android:id="@+id/pager_total_divider"
+        android:layout_height="1dp"
+        android:layout_width="match_parent"
+        android:layout_marginTop="16dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        layout="@layout/divider"
+        app:layout_constraintTop_toBottomOf="@id/calculationTabPagerLL"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        />
+
+    <TextView
+        android:id="@+id/calculationCostTotalTitleTv"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        style="@style/TotalTitleText"
+        android:text="Cost Total:"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/calculationTabPagerLL"
+        app:layout_constraintBottom_toTopOf="@id/calculationPercentageTotalTitleTv"
+        app:layout_constraintEnd_toStartOf="@id/calculationCostTotalTv"/>
+
+    <TextView
+        android:id="@+id/calculationPercentageTotalTitleTv"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        style="@style/TotalTitleText"
+        android:textSize="20sp"
+        android:text="Percentage Total:"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/calculationCostTotalTitleTv"
+        app:layout_constraintBottom_toTopOf="@id/calculationMarkupTi"
+        app:layout_constraintEnd_toStartOf="@id/calculationPercentageTotalTv"/>
 
 
     <TextView
@@ -172,10 +254,11 @@
         android:layout_height="wrap_content"
         android:layout_margin="16dp"
         style="@style/TotalText"
-        android:text="test"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/calculationMarkupTi"
-        app:layout_constraintEnd_toStartOf="@id/calculationPercentageTotalTv"/>
+        android:text="Cost"
+        app:layout_constraintStart_toEndOf="@id/calculationCostTotalTitleTv"
+        app:layout_constraintTop_toTopOf="@id/calculationCostTotalTitleTv"
+        app:layout_constraintBottom_toBottomOf="@id/calculationCostTotalTitleTv"
+        app:layout_constraintEnd_toEndOf="parent"/>
 
     <TextView
         android:id="@+id/calculationPercentageTotalTv"
@@ -183,10 +266,11 @@
         android:layout_height="wrap_content"
         android:layout_margin="16dp"
         style="@style/TotalText"
-        android:text="teste"
-        app:layout_constraintStart_toEndOf="@id/calculationCostTotalTv"
+        android:text="Percentage"
+        app:layout_constraintTop_toTopOf="@id/calculationPercentageTotalTitleTv"
+        app:layout_constraintBottom_toBottomOf="@id/calculationPercentageTotalTitleTv"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/calculationMarkupTi"/>
+        app:layout_constraintStart_toEndOf="@id/calculationPercentageTotalTitleTv"/>
 
 
     <com.google.android.material.textfield.TextInputLayout

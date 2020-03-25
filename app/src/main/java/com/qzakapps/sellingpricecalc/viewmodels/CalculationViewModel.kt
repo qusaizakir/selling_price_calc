@@ -36,6 +36,8 @@ interface CalculationViewModelInputs {
 interface CalculationViewModelOutputs {
     fun insertCost(): Observable<Unit>
     fun insertPercentage(): Observable<Unit>
+    val clearCostNameAndCost: Observable<Unit>
+    val clearPercentageNameAndCost: Observable<Unit>
     fun costBtnEnabled(): Observable<Boolean>
     fun percentageBtnEnabled(): Observable<Boolean>
 
@@ -75,6 +77,9 @@ class CalculationViewModel(application: Application) : AndroidViewModel(applicat
     override val profit: PublishSubject<BigDecimal> = PublishSubject.create()
     override val markup: PublishSubject<BigDecimal> = PublishSubject.create()
 
+    override val clearCostNameAndCost: PublishSubject<Unit> = PublishSubject.create()
+    override val clearPercentageNameAndCost: PublishSubject<Unit> = PublishSubject.create()
+
     override val profitMarginError: PublishSubject<Boolean> = PublishSubject.create()
 
     val outputs: CalculationViewModelOutputs = this
@@ -82,6 +87,7 @@ class CalculationViewModel(application: Application) : AndroidViewModel(applicat
     //region inputs
     fun onAddCostBtnClicked(){
         addCostBtnClicked.onNext(true)
+        clearCostNameAndCost.onNext(Unit)
     }
 
     fun onCostNameTextChange(text: String){
@@ -94,6 +100,7 @@ class CalculationViewModel(application: Application) : AndroidViewModel(applicat
 
     fun onAddPercentageBtnClicked(){
         addPercentageBtnClicked.onNext(true)
+        clearPercentageNameAndCost.onNext(Unit)
     }
 
     fun onPercentageNameTextChange(text: String){
@@ -147,14 +154,14 @@ class CalculationViewModel(application: Application) : AndroidViewModel(applicat
         return combineLatest(
             costName,
             costValue,
-            BiFunction<String, String, Boolean> { name, value -> !(name.isEmpty() && value.isEmpty()) })
+            BiFunction<String, String, Boolean> { name, value -> name.isNotEmpty() && value.isNotEmpty() })
     }
 
     override fun percentageBtnEnabled(): Observable<Boolean> {
         return combineLatest(
             percentageName,
             percentageValue,
-            BiFunction<String, String, Boolean> { name, value -> !(name.isEmpty() && value.isEmpty()) })
+            BiFunction<String, String, Boolean> { name, value -> name.isNotEmpty() && value.isNotEmpty() })
     }
 
     override fun insertCost(): Observable<Unit> {

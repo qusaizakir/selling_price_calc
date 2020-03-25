@@ -9,6 +9,7 @@ import androidx.core.widget.doAfterTextChanged
 import com.google.android.material.tabs.TabLayoutMediator
 import com.qzakapps.sellingpricecalc.R
 import com.qzakapps.sellingpricecalc.adapters.CalculationViewPagerAdapter
+import com.qzakapps.sellingpricecalc.helper.clearText
 import com.qzakapps.sellingpricecalc.viewmodels.CalculationViewModel
 import kotlinx.android.synthetic.main.calculation_fragment.*
 
@@ -41,6 +42,7 @@ class CalculationFragment() : BaseFragment<CalculationViewModel>() {
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
+        //region inputs
         calculationCostNameEt.doAfterTextChanged { text -> viewModel.onCostNameTextChange(text.toString())}
         calculationCostValueEt.doAfterTextChanged { text -> viewModel.onCostValueTextChange(text.toString())}
         calculationPercentageNameEt.doAfterTextChanged { text -> viewModel.onPercentageNameTextChange(text.toString())}
@@ -53,12 +55,23 @@ class CalculationFragment() : BaseFragment<CalculationViewModel>() {
         calculationSalePriceEt.doAfterTextChanged { text -> if(calculationSalePriceEt.hasFocus()) viewModel.onSalePriceTextChange(text.toString())}
         calculationMarkupEt.doAfterTextChanged { text -> if(calculationMarkupEt.hasFocus()) viewModel.onMarkupTextChange(text.toString())}
         calculationProfitEt.doAfterTextChanged { text -> if(calculationProfitEt.hasFocus())  viewModel.onProfitTextChange(text.toString())}
+        //endregion
 
+        //region outputs
         viewModel.outputs.costBtnEnabled().subscribe {enabled -> calculationAddCostBtn.isEnabled = enabled}.autoDispose()
         viewModel.outputs.percentageBtnEnabled().subscribe {enabled -> calculationAddPercentageBtn.isEnabled = enabled}.autoDispose()
 
         viewModel.outputs.insertCost().subscribe { Toast.makeText(context, "Cost Added", Toast.LENGTH_SHORT).show()}.autoDispose()
         viewModel.outputs.insertPercentage().subscribe { Toast.makeText(context, "Percentage Added", Toast.LENGTH_SHORT).show()}.autoDispose()
+
+        viewModel.outputs.clearCostNameAndCost.subscribe {
+            calculationCostNameEt.clearText(); calculationCostNameEt.clearFocus()
+            calculationCostValueEt.clearText(); calculationCostValueEt.clearFocus()
+        }.autoDispose()
+        viewModel.outputs.clearPercentageNameAndCost.subscribe{
+            calculationPercentageNameEt.clearText(); calculationPercentageNameEt.clearFocus()
+            calculationPercentageValueEt.clearText(); calculationPercentageValueEt.clearFocus()
+        }.autoDispose()
 
         viewModel.outputs.salePrice().subscribe { t -> calculationSalePriceEt.setText(t)}.autoDispose()
         viewModel.outputs.markup().subscribe { t -> calculationMarkupEt.setText(t)}.autoDispose()
@@ -66,10 +79,10 @@ class CalculationFragment() : BaseFragment<CalculationViewModel>() {
         viewModel.outputs.profitMargin().subscribe { t -> calculationProfitMarginEt.setText(t)}.autoDispose()
 
         viewModel.outputs.displayFixedCost().subscribe { t -> calculationCostTotalTv.text = t}.autoDispose()
-        viewModel.outputs.displayPercentageCost().subscribe { t -> calculationPercentageTotalTv.text = t }.autoDispose()
+        viewModel.outputs.displayPercentageCost().subscribe { t -> calculationPercentageTotalTv.text = getString(R.string.percentage_format, t) }.autoDispose()
 
         viewModel.outputs.profitMarginError.subscribe{showError -> calculationProfitMarginTi.error = if(showError) getString(R.string.profit_margin_error) else "" }.autoDispose()
-
+        //endregion
     }
 
 

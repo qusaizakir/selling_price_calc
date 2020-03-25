@@ -14,4 +14,10 @@
     <string name="percentage_cost">Percentage Cost</string>
     <string name="cost">Cost</string>
     <string name="percentage">Percentage</string>
+    <string name="percentage_fee">Percentage Fee</string>
+    <string name="name">Name</string>
+    <string name="price">Price</string>
+    <string name="percentage_format">%1$s%%</string>
+    <string name="cost_content">Fixed costs such as item cost, postage and packing etc.</string>
+    <string name="percentage_content">Percentage Fee taken from total sale price such as eBay/Amazon/PayPal category fee </string>
 </resources>
