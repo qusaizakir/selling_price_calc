@@ -6,6 +6,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.core.widget.doAfterTextChanged
+import com.afollestad.materialdialogs.MaterialDialog
+import com.afollestad.materialdialogs.customview.customView
 import com.google.android.material.tabs.TabLayoutMediator
 import com.qzakapps.sellingpricecalc.R
 import com.qzakapps.sellingpricecalc.adapters.CalculationViewPagerAdapter
@@ -32,8 +34,7 @@ class CalculationFragment() : BaseFragment<CalculationViewModel>() {
         calculationViewPagerAdapter = CalculationViewPagerAdapter(this)
         calculationPager.adapter = calculationViewPagerAdapter
         TabLayoutMediator(calculationTabLayout, calculationPager){
-            tab, position -> tab.text = if(position == 0) "Cost Price" else "Percentage Fee"
-            //TODO fix the name of the tabs
+            tab, position -> tab.text = if(position == 0) getString(R.string.cost_tab_title) else getString(R.string.percentage_tab_title)
         }.attach()
 
         super.onViewCreated(view, savedInstanceState)
@@ -50,19 +51,32 @@ class CalculationFragment() : BaseFragment<CalculationViewModel>() {
 
         calculationAddCostBtn.setOnClickListener { viewModel.onAddCostBtnClicked()}
         calculationAddPercentageBtn.setOnClickListener { viewModel.onAddPercentageBtnClicked()}
+        calculationSaveBtn.setOnClickListener {viewModel.onSaveTemplateBtnClicked()}
 
-        calculationProfitMarginEt.doAfterTextChanged { text -> if(calculationProfitMarginEt.hasFocus()) viewModel.onProfitMarginTextChange(text.toString())}
-        calculationSalePriceEt.doAfterTextChanged { text -> if(calculationSalePriceEt.hasFocus()) viewModel.onSalePriceTextChange(text.toString())}
-        calculationMarkupEt.doAfterTextChanged { text -> if(calculationMarkupEt.hasFocus()) viewModel.onMarkupTextChange(text.toString())}
-        calculationProfitEt.doAfterTextChanged { text -> if(calculationProfitEt.hasFocus())  viewModel.onProfitTextChange(text.toString())}
+        calculationProfitMarginEt.doAfterTextChanged { text ->
+            if(calculationProfitMarginEt.hasFocus()) { viewModel.onProfitMarginTextChangeByUser(text.toString()) }
+            viewModel.onProfitMarginStringChanged(text.toString())
+        }
+        calculationSalePriceEt.doAfterTextChanged { text ->
+            if(calculationSalePriceEt.hasFocus()) { viewModel.onSalePriceTextChangeByUser(text.toString()) }
+            viewModel.onSalePriceStringChanged(text.toString())
+        }
+        calculationMarkupEt.doAfterTextChanged { text ->
+            if(calculationMarkupEt.hasFocus()) { viewModel.onMarkupTextChangeByUser(text.toString()) }
+            viewModel.onMarkupStringChanged(text.toString())
+        }
+        calculationProfitEt.doAfterTextChanged { text ->
+            if(calculationProfitEt.hasFocus()) { viewModel.onProfitTextChangeByUser(text.toString()) }
+            viewModel.onProfitStringChanged(text.toString())
+        }
         //endregion
 
         //region outputs
         viewModel.outputs.costBtnEnabled().subscribe {enabled -> calculationAddCostBtn.isEnabled = enabled}.autoDispose()
         viewModel.outputs.percentageBtnEnabled().subscribe {enabled -> calculationAddPercentageBtn.isEnabled = enabled}.autoDispose()
 
-        viewModel.outputs.insertCost().subscribe { Toast.makeText(context, "Cost Added", Toast.LENGTH_SHORT).show()}.autoDispose()
-        viewModel.outputs.insertPercentage().subscribe { Toast.makeText(context, "Percentage Added", Toast.LENGTH_SHORT).show()}.autoDispose()
+        viewModel.outputs.insertCost().subscribe { Toast.makeText(context, R.string.add_cost_toast, Toast.LENGTH_SHORT).show()}.autoDispose()
+        viewModel.outputs.insertPercentage().subscribe { Toast.makeText(context, R.string.add_percentage_toast, Toast.LENGTH_SHORT).show()}.autoDispose()
 
         viewModel.outputs.clearCostNameAndCost.subscribe {
             calculationCostNameEt.clearText(); calculationCostNameEt.clearFocus()
@@ -82,9 +96,23 @@ class CalculationFragment() : BaseFragment<CalculationViewModel>() {
         viewModel.outputs.displayPercentageCost().subscribe { t -> calculationPercentageTotalTv.text = getString(R.string.percentage_format, t) }.autoDispose()
 
         viewModel.outputs.profitMarginError.subscribe{showError -> calculationProfitMarginTi.error = if(showError) getString(R.string.profit_margin_error) else "" }.autoDispose()
+
+        viewModel.outputs.saveTemplate().subscribe{ Toast.makeText(context, "Saved", Toast.LENGTH_SHORT).show()}.autoDispose()
+
+        viewModel.outputs.showSaveDialog.subscribe { showSaveDialog() }.autoDispose()
+
         //endregion
+
     }
 
-
+    private fun showSaveDialog(){
+        context?.let {
+            MaterialDialog(it).show {
+                customView(R.layout.calculation_save_dialog, noVerticalPadding = true)
+                positiveButton (R.string.save) { viewModel.saveTemplateBtnClicked.onNext(true) }
+                negativeButton (R.string.cancel) { dismiss() }
+            }
+        }
+    }
 
 }

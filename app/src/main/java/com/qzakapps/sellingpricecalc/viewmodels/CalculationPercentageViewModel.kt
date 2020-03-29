@@ -14,14 +14,7 @@ interface CalculationPercentageViewModelOutputs {
     fun percentageList(): Observable<List<Percentage>>
 }
 
-class CalculationPercentageViewModel(application: Application): AndroidViewModel(application), CalculationPercentageViewModelInputs, CalculationPercentageViewModelOutputs {
-
-    private val repo: Repository
-    init {
-        val costDao = AppDatabase.getDatabase(application).costDao()
-        val percentageDao = AppDatabase.getDatabase(application).percentageDao()
-        repo = Repository(costDao, percentageDao)
-    }
+class CalculationPercentageViewModel(application: Application): BaseViewModel(application), CalculationPercentageViewModelInputs, CalculationPercentageViewModelOutputs {
 
     private val percentageList: Observable<List<Percentage>> = repo.getAllPercentage
 

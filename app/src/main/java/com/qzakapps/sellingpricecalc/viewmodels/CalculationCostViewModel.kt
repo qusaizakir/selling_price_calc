@@ -14,14 +14,7 @@ interface CalculationCostViewModelOutputs {
     fun costList(): Observable<List<Cost>>
 }
 
-class CalculationCostViewModel(application: Application) : AndroidViewModel(application), CalculationCostViewModelInputs, CalculationCostViewModelOutputs {
-
-    private val repo: Repository
-    init {
-        val costDao = AppDatabase.getDatabase(application).costDao()
-        val percentageDao = AppDatabase.getDatabase(application).percentageDao()
-        repo = Repository(costDao, percentageDao)
-    }
+class CalculationCostViewModel(application: Application) : BaseViewModel(application), CalculationCostViewModelInputs, CalculationCostViewModelOutputs {
 
     private val costList: Observable<List<Cost>> = repo.getAllCost
 

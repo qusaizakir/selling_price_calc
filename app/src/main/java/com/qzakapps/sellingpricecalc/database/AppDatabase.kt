@@ -4,17 +4,23 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import androidx.room.TypeConverters
 import com.qzakapps.sellingpricecalc.dao.CostDao
 import com.qzakapps.sellingpricecalc.dao.PercentageDao
+import com.qzakapps.sellingpricecalc.dao.TemplateDao
+import com.qzakapps.sellingpricecalc.helper.Converters
 import com.qzakapps.sellingpricecalc.models.Cost
 import com.qzakapps.sellingpricecalc.models.Percentage
+import com.qzakapps.sellingpricecalc.models.Template
 
 
-@Database(entities = [Cost::class, Percentage::class], version = 1, exportSchema = false)
-public abstract class AppDatabase : RoomDatabase() {
+@Database(entities = [Cost::class, Percentage::class, Template::class], version = 2, exportSchema = false)
+@TypeConverters(Converters::class)
+abstract class AppDatabase : RoomDatabase() {
 
     abstract fun costDao(): CostDao
     abstract fun percentageDao(): PercentageDao
+    abstract fun templateDao(): TemplateDao
 
     companion object {
         @Volatile
@@ -30,7 +36,9 @@ public abstract class AppDatabase : RoomDatabase() {
                     context.applicationContext,
                     AppDatabase::class.java,
                     "database"
-                ).build()
+                )
+                    .fallbackToDestructiveMigration()
+                    .build()
                 INSTANCE = instance
                 return instance
             }

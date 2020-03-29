@@ -19,5 +19,17 @@
     <string name="price">Price</string>
     <string name="percentage_format">%1$s%%</string>
     <string name="cost_content">Fixed costs such as item cost, postage and packing etc.</string>
-    <string name="percentage_content">Percentage Fee taken from total sale price such as eBay/Amazon/PayPal category fee </string>
+    <string name="percentage_content">Percentage Fee taken from total sale price such as eBay/Amazon/PayPal fees. </string>
+    <string name="add_cost_toast">Cost Added</string>
+    <string name="add_percentage_toast">Percentage Added</string>
+    <string name="cost_tab_title">Cost List</string>
+    <string name="percentage_tab_title">Percentage Fee List</string>
+    <string name="cost_total">Cost Total:</string>
+    <string name="percentage_fee_total">Percentage Total:</string>
+    <string name="load_template">Load Template</string>
+    <string name="save_template">Save Template</string>
+    <string name="save_dialog_message">Save the Cost List, Percentage List and the current calculations</string>
+    <string name="save">Save</string>
+    <string name="template_name">Template Name</string>
+    <string name="cancel">Cancel</string>
 </resources>
