@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/calculation_menu_save_template"
+        android:title="@string/save"
+        android:icon="@drawable/ic_save"
+        app:iconTint="@color/colorWhite"
+        app:showAsAction="always"
+        />
+
+    <item
+        android:id="@+id/calculation_menu_load_template"
+        android:title="@string/load"
+        android:icon="@drawable/ic_load"
+        app:iconTint="@color/colorWhite"
+        app:showAsAction="always"
+        />
+
+    <item
+        android:id="@+id/calculation_menu_settings"
+        android:title="@string/settings"
+        app:showAsAction="never"
+        />
+
+</menu>

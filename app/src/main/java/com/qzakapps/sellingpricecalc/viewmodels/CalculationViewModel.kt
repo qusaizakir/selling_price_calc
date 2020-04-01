@@ -1,9 +1,8 @@
 package com.qzakapps.sellingpricecalc.viewmodels
 
 import android.app.Application
-import com.afollestad.materialdialogs.MaterialDialog
-import com.afollestad.materialdialogs.customview.customView
-import com.qzakapps.sellingpricecalc.R
+import android.widget.Toast
+import com.qzakapps.sellingpricecalc.adapters.CalculationLoadTemplateRecyclerAdapter
 import com.qzakapps.sellingpricecalc.helper.*
 import com.qzakapps.sellingpricecalc.models.Cost
 import com.qzakapps.sellingpricecalc.models.Percentage
@@ -39,7 +38,7 @@ interface CalculationViewModelInputs {
     val fixedCost: PublishSubject<BigDecimal>
     val percentCost: PublishSubject<BigDecimal>
 
-    val saveTemplateBtnClicked: PublishSubject<Boolean>
+    val saveTemplateBtnClicked: PublishSubject<String>
 }
 
 interface CalculationViewModelOutputs {
@@ -62,9 +61,15 @@ interface CalculationViewModelOutputs {
 
     fun saveTemplate(): Observable<Unit>
     val showSaveDialog: Observable<Unit>
+    val showLoadDialog: Observable<Unit>
+    val templateList: Observable<List<Template>>
 }
 
-class CalculationViewModel(application: Application) : BaseViewModel(application), CalculationViewModelInputs, CalculationViewModelOutputs {
+class CalculationViewModel(application: Application) :
+    BaseViewModel(application),
+    CalculationViewModelInputs,
+    CalculationViewModelOutputs,
+    CalculationLoadTemplateRecyclerAdapter.TemplateClicked {
 
     override val fixedCost: PublishSubject<BigDecimal> = PublishSubject.create()
     override val percentCost: PublishSubject<BigDecimal> = PublishSubject.create()
@@ -92,8 +97,11 @@ class CalculationViewModel(application: Application) : BaseViewModel(application
 
     override val profitMarginError: PublishSubject<Boolean> = PublishSubject.create()
 
-    override val saveTemplateBtnClicked: PublishSubject<Boolean> = PublishSubject.create()
+    override val templateList: Observable<List<Template>> = repo.getAllTemplate
+
+    override val saveTemplateBtnClicked: PublishSubject<String> = PublishSubject.create()
     override val showSaveDialog: PublishSubject<Unit> = PublishSubject.create()
+    override val showLoadDialog: PublishSubject<Unit> = PublishSubject.create()
 
     private val templateObservableList = listOf(
         repo.getAllCost,
@@ -106,6 +114,9 @@ class CalculationViewModel(application: Application) : BaseViewModel(application
     val outputs: CalculationViewModelOutputs = this
 
     //region logic
+    override fun templateClicked(template: Template) {
+        Toast.makeText(getApplication(), template.name, Toast.LENGTH_SHORT).show()
+    }
     //endregion
 
     //region inputs
@@ -127,6 +138,10 @@ class CalculationViewModel(application: Application) : BaseViewModel(application
 
     fun onSaveTemplateBtnClicked(){
         showSaveDialog.onNext(Unit)
+    }
+
+    fun onLoadTemplateBtnClicked(){
+        showLoadDialog.onNext(Unit)
     }
 
     fun onAddCostBtnClicked(){
@@ -180,7 +195,7 @@ class CalculationViewModel(application: Application) : BaseViewModel(application
         return saveTemplateBtnClicked.withLatestFrom(templateObservableList){ observableList ->
 
             val template = Template(
-                name = "test:"+ System.currentTimeMillis(),
+                name = (observableList[0] as String),
                 costList = (observableList[1] as List<Cost>),
                 percentageList = (observableList[2] as List<Percentage>),
                 markup = (observableList[3] as String),
@@ -362,6 +377,5 @@ class CalculationViewModel(application: Application) : BaseViewModel(application
                     })
         ).observeOn(AndroidSchedulers.mainThread())
     }
-
     //endregion
 }
