@@ -1,10 +1,7 @@
 package com.qzakapps.sellingpricecalc.dao
 
-import androidx.room.Dao
-import androidx.room.Insert
-import androidx.room.Query
+import androidx.room.*
 import com.qzakapps.sellingpricecalc.models.Template
-import io.reactivex.Completable
 import io.reactivex.Observable
 
 
@@ -14,6 +11,15 @@ interface TemplateDao {
     @Query ("SELECT * FROM Template ORDER BY name DESC")
     fun getAllTemplate(): Observable<List<Template>>
 
-    @Insert
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertTemplate(template: Template)
+
+    @Update
+    fun updateTemplate(template: Template)
+
+    @Query("DELETE FROM Template")
+    fun deleteAllTemplates()
+
+    @Query("SELECT * FROM Template WHERE :id = id")
+    fun getTemplateById(id: String): Observable<Template>
 }

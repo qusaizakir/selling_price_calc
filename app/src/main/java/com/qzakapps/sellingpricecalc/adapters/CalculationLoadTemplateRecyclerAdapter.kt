@@ -5,9 +5,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.qzakapps.sellingpricecalc.R
-import com.qzakapps.sellingpricecalc.models.Cost
 import com.qzakapps.sellingpricecalc.models.Template
-import kotlinx.android.synthetic.main.calculation_cost_recycler_item.view.*
 import kotlinx.android.synthetic.main.calculation_template_recycler_item.view.*
 
 class CalculationLoadTemplateRecyclerAdapter (
@@ -43,6 +41,6 @@ class CalculationLoadTemplateRecyclerAdapter (
     }
 
     interface TemplateClicked {
-        fun templateClicked(template: Template)
+        fun templateClicked(template: Template, fromDialog: Boolean = true)
     }
 }

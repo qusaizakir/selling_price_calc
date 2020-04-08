@@ -7,10 +7,10 @@ import androidx.core.widget.doAfterTextChanged
 import com.afollestad.materialdialogs.MaterialDialog
 import com.afollestad.materialdialogs.customview.customView
 import com.afollestad.materialdialogs.customview.getCustomView
-import com.google.android.material.tabs.TabLayoutMediator
 import com.qzakapps.sellingpricecalc.R
+import com.qzakapps.sellingpricecalc.adapters.CalculationCostRecyclerAdapter
 import com.qzakapps.sellingpricecalc.adapters.CalculationLoadTemplateRecyclerAdapter
-import com.qzakapps.sellingpricecalc.adapters.CalculationViewPagerAdapter
+import com.qzakapps.sellingpricecalc.adapters.CalculationPercentageRecyclerAdapter
 import com.qzakapps.sellingpricecalc.helper.clearText
 import com.qzakapps.sellingpricecalc.viewmodels.CalculationViewModel
 import kotlinx.android.synthetic.main.calculation_fragment.*
@@ -19,8 +19,11 @@ import kotlinx.android.synthetic.main.calculation_save_dialog.view.*
 
 class CalculationFragment : BaseFragment<CalculationViewModel>() {
 
-    private lateinit var calculationViewPagerAdapter: CalculationViewPagerAdapter
     private lateinit var loadTemplateDialogAdapter: CalculationLoadTemplateRecyclerAdapter
+    private var costAdapter: CalculationCostRecyclerAdapter = CalculationCostRecyclerAdapter()
+    private var percentageAdapter: CalculationPercentageRecyclerAdapter = CalculationPercentageRecyclerAdapter()
+    private var loadDialog: MaterialDialog? = null
+    private var saveDialog: MaterialDialog? = null
 
     companion object {
         fun newInstance() =
@@ -35,16 +38,9 @@ class CalculationFragment : BaseFragment<CalculationViewModel>() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        setupViewPagerAdapter()
+        calculationCostListRV.adapter = costAdapter
+        calculationPercentageListRV.adapter = percentageAdapter
         super.onViewCreated(view, savedInstanceState)
-    }
-
-    private fun setupViewPagerAdapter(){
-        calculationViewPagerAdapter = CalculationViewPagerAdapter(this)
-        calculationPager.adapter = calculationViewPagerAdapter
-        TabLayoutMediator(calculationTabLayout, calculationPager){
-                tab, position -> tab.text = if(position == 0) getString(R.string.cost_tab_title) else getString(R.string.percentage_tab_title)
-        }.attach()
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
@@ -56,6 +52,7 @@ class CalculationFragment : BaseFragment<CalculationViewModel>() {
         when(item.itemId){
             R.id.calculation_menu_save_template -> viewModel.onSaveTemplateBtnClicked()
             R.id.calculation_menu_load_template -> viewModel.onLoadTemplateBtnClicked()
+            R.id.calculation_menu_settings -> viewModel.onSettingsBtnClicked()
             else -> return super.onOptionsItemSelected(item)
         }
         return super.onOptionsItemSelected(item)
@@ -66,7 +63,14 @@ class CalculationFragment : BaseFragment<CalculationViewModel>() {
 
         //Loading template adapter
         loadTemplateDialogAdapter = CalculationLoadTemplateRecyclerAdapter(templateClickedInterface = viewModel)
-        
+
+        //Create Dialogs
+        createLoadDialog()
+        createSaveDialog()
+
+        //Load Template
+        viewModel.loadTemplate().subscribe { template -> viewModel.templateClicked(template, false)}.autoDispose()
+
         //region inputs
         calculationCostNameEt.doAfterTextChanged { text -> viewModel.onCostNameTextChange(text.toString())}
         calculationCostValueEt.doAfterTextChanged { text -> viewModel.onCostValueTextChange(text.toString())}
@@ -102,6 +106,9 @@ class CalculationFragment : BaseFragment<CalculationViewModel>() {
         viewModel.outputs.insertCost().subscribe { Toast.makeText(context, R.string.add_cost_toast, Toast.LENGTH_SHORT).show()}.autoDispose()
         viewModel.outputs.insertPercentage().subscribe { Toast.makeText(context, R.string.add_percentage_toast, Toast.LENGTH_SHORT).show()}.autoDispose()
 
+        viewModel.outputs.costList.subscribe { costList -> costAdapter.setData(costList)}.autoDispose()
+        viewModel.outputs.percentageList.subscribe{ percentageList -> percentageAdapter.setData(percentageList)}.autoDispose()
+
         viewModel.outputs.clearCostNameAndCost.subscribe {
             calculationCostNameEt.clearText(); calculationCostNameEt.clearFocus()
             calculationCostValueEt.clearText(); calculationCostValueEt.clearFocus()
@@ -111,10 +118,10 @@ class CalculationFragment : BaseFragment<CalculationViewModel>() {
             calculationPercentageValueEt.clearText(); calculationPercentageValueEt.clearFocus()
         }.autoDispose()
 
-        viewModel.outputs.salePrice().subscribe { t -> calculationSalePriceEt.setText(t)}.autoDispose()
-        viewModel.outputs.markup().subscribe { t -> calculationMarkupEt.setText(t)}.autoDispose()
-        viewModel.outputs.profit().subscribe { t -> calculationProfitEt.setText(t)}.autoDispose()
-        viewModel.outputs.profitMargin().subscribe { t -> calculationProfitMarginEt.setText(t)}.autoDispose()
+        viewModel.outputs.salePriceOutput.subscribe { t -> calculationSalePriceEt.setText(t)}.autoDispose()
+        viewModel.outputs.markupOutput.subscribe { t -> calculationMarkupEt.setText(t)}.autoDispose()
+        viewModel.outputs.profitOutput.subscribe { t -> calculationProfitEt.setText(t)}.autoDispose()
+        viewModel.outputs.profitMarginOutput.subscribe { t -> calculationProfitMarginEt.setText(t)}.autoDispose()
 
         viewModel.outputs.displayFixedCost().subscribe { t -> calculationCostTotalTv.text = t}.autoDispose()
         viewModel.outputs.displayPercentageCost().subscribe { t -> calculationPercentageTotalTv.text = getString(R.string.percentage_format, t) }.autoDispose()
@@ -123,50 +130,58 @@ class CalculationFragment : BaseFragment<CalculationViewModel>() {
 
         viewModel.outputs.saveTemplate().subscribe{ Toast.makeText(context, getString(R.string.saved_toast), Toast.LENGTH_SHORT).show()}.autoDispose()
 
-        viewModel.outputs.showSaveDialog.subscribe { showSaveDialog() }.autoDispose()
-        viewModel.outputs.showLoadDialog.subscribe { showLoadDialog() }.autoDispose()
+        viewModel.outputs.showSaveDialog.subscribe { saveDialog?.show() }.autoDispose()
+        viewModel.outputs.showLoadDialog.subscribe { loadDialog?.show() }.autoDispose()
 
         viewModel.outputs.templateList.subscribe{ templateList -> loadTemplateDialogAdapter.setData(templateList)}.autoDispose()
+        viewModel.outputs.templateLoaded.subscribe{
+            loadDialog?.dismiss()
+            Toast.makeText(context, "Loaded Template", Toast.LENGTH_SHORT).show()
+        }.autoDispose()
         //endregion
 
     }
 
-    private fun showSaveDialog(){
-        context?.let {
-            MaterialDialog(it).show {
-                customView(R.layout.calculation_save_dialog, noVerticalPadding = true)
-                noAutoDismiss()
-                positiveButton (R.string.save) {
-                    val nameEditText = getCustomView().calculationSaveDialogTemplateNameEt
-                    val nameTextInput = getCustomView().calculationSaveDialogTemplateNameTi
+    override fun onPause() {
+        viewModel.saveCurrentTemplateOnClose()
+        super.onPause()
 
-                    if (!nameEditText.text.isNullOrEmpty()){
-                        viewModel.saveTemplateBtnClicked.onNext(nameEditText.text.toString())
-                        nameTextInput.error = ""
-                        dismiss()
-                    }else{
-                        nameTextInput.error = getString(R.string.template_name_error)
+    }
+
+    private fun createSaveDialog() {
+        context?.let {
+            saveDialog =
+                MaterialDialog(it)
+                    .run {
+                        customView(R.layout.calculation_save_dialog, noVerticalPadding = true)
+                        noAutoDismiss()
+                        positiveButton (R.string.save) {
+                            val nameEditText = getCustomView().calculationSaveDialogTemplateNameEt
+                            val nameTextInput = getCustomView().calculationSaveDialogTemplateNameTi
+
+                            if (!nameEditText.text.isNullOrEmpty()){
+                                viewModel.saveTemplateBtnClicked.onNext(nameEditText.text.toString())
+                                nameTextInput.error = ""
+                                dismiss()
+                            }else{
+                                nameTextInput.error = getString(R.string.template_name_error)
+                            }
+                        }
+                        negativeButton (R.string.cancel) { dismiss() }
                     }
-                }
-                negativeButton (R.string.cancel) { dismiss() }
-            }
         }
     }
 
-    private fun showLoadDialog(){
+    private fun createLoadDialog() {
         context?.let {
-
-            val dialog = MaterialDialog(it)
-                .run {
-                    customView(R.layout.calculation_load_dialog, noVerticalPadding = true)
-                    noAutoDismiss()
-                    negativeButton (R.string.cancel) { dismiss() }
-                }
-
-            val recyclerView = dialog.getCustomView().calculationLoadDialogRecyclerView
-            recyclerView.adapter = loadTemplateDialogAdapter
-
-            dialog.show()
+            loadDialog = MaterialDialog(it)
+                            .run {
+                                customView(R.layout.calculation_load_dialog, noVerticalPadding = true)
+                                negativeButton (R.string.cancel) { dismiss() }
+                            }
+            val recyclerView = loadDialog?.getCustomView()?.calculationLoadDialogRecyclerView
+            recyclerView?.adapter = loadTemplateDialogAdapter
         }
     }
+
 }

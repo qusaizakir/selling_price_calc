@@ -1,17 +1,19 @@
 package com.qzakapps.sellingpricecalc.viewmodels
 
 import android.app.Application
-import android.widget.Toast
+import com.qzakapps.sellingpricecalc.BaseApplication
 import com.qzakapps.sellingpricecalc.adapters.CalculationLoadTemplateRecyclerAdapter
 import com.qzakapps.sellingpricecalc.helper.*
 import com.qzakapps.sellingpricecalc.models.Cost
 import com.qzakapps.sellingpricecalc.models.Percentage
 import com.qzakapps.sellingpricecalc.models.Template
+import com.qzakapps.sellingpricecalc.models.UNSAVED_TEMPLATE_ID
 import io.reactivex.Observable
 import io.reactivex.Observable.combineLatest
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.functions.BiFunction
 import io.reactivex.functions.Function3
+import io.reactivex.functions.Function4
 import io.reactivex.subjects.BehaviorSubject
 import io.reactivex.subjects.PublishSubject
 import java.math.BigDecimal
@@ -30,20 +32,24 @@ interface CalculationViewModelInputs {
     val profit: PublishSubject<BigDecimal>
     val markup: PublishSubject<BigDecimal>
 
-    val profitMarginString: BehaviorSubject<String>
-    val salePriceString: BehaviorSubject<String>
-    val profitString: BehaviorSubject<String>
-    val markupString: BehaviorSubject<String>
+    val profitMarginFullString: BehaviorSubject<String>
+    val salePriceFullString: BehaviorSubject<String>
+    val profitFullString: BehaviorSubject<String>
+    val markupFullString: BehaviorSubject<String>
 
     val fixedCost: PublishSubject<BigDecimal>
     val percentCost: PublishSubject<BigDecimal>
 
     val saveTemplateBtnClicked: PublishSubject<String>
+    val settingsBtnClicked: PublishSubject<Unit>
 }
 
 interface CalculationViewModelOutputs {
     fun insertCost(): Observable<Unit>
     fun insertPercentage(): Observable<Unit>
+    val costList: BehaviorSubject<List<Cost>>
+    val percentageList: BehaviorSubject<List<Percentage>>
+    val templateList: Observable<List<Template>>
     val clearCostNameAndCost: Observable<Unit>
     val clearPercentageNameAndCost: Observable<Unit>
     fun costBtnEnabled(): Observable<Boolean>
@@ -52,17 +58,17 @@ interface CalculationViewModelOutputs {
     fun displayFixedCost(): Observable<String>
     fun displayPercentageCost(): Observable<String>
 
-    fun salePrice(): Observable<String>
-    fun markup(): Observable<String>
-    fun profit(): Observable<String>
-    fun profitMargin(): Observable<String>
+    val profitMarginOutput: BehaviorSubject<String>
+    val profitOutput: BehaviorSubject<String>
+    val salePriceOutput: BehaviorSubject<String>
+    val markupOutput: BehaviorSubject<String>
 
     val profitMarginError: PublishSubject<Boolean>
 
     fun saveTemplate(): Observable<Unit>
     val showSaveDialog: Observable<Unit>
     val showLoadDialog: Observable<Unit>
-    val templateList: Observable<List<Template>>
+    val templateLoaded: Observable<Unit>
 }
 
 class CalculationViewModel(application: Application) :
@@ -71,9 +77,7 @@ class CalculationViewModel(application: Application) :
     CalculationViewModelOutputs,
     CalculationLoadTemplateRecyclerAdapter.TemplateClicked {
 
-    override val fixedCost: PublishSubject<BigDecimal> = PublishSubject.create()
-    override val percentCost: PublishSubject<BigDecimal> = PublishSubject.create()
-
+    //region Input Variables
     override val addCostBtnClicked: PublishSubject<Boolean> = PublishSubject.create()
     override val costName: BehaviorSubject<String> = BehaviorSubject.createDefault("")
     override val costValue: BehaviorSubject<String> = BehaviorSubject.createDefault("")
@@ -82,58 +86,244 @@ class CalculationViewModel(application: Application) :
     override val percentageName: BehaviorSubject<String> = BehaviorSubject.createDefault("")
     override val percentageValue: BehaviorSubject<String> = BehaviorSubject.createDefault("")
 
+    //The streams that contain input values that only emit when xTextChangeByUser is called
     override val profitMargin: PublishSubject<BigDecimal> = PublishSubject.create()
     override val salePrice: PublishSubject<BigDecimal> = PublishSubject.create()
     override val profit: PublishSubject<BigDecimal> = PublishSubject.create()
     override val markup: PublishSubject<BigDecimal> = PublishSubject.create()
 
-    override val profitMarginString: BehaviorSubject<String> = BehaviorSubject.createDefault("")
-    override val salePriceString: BehaviorSubject<String> = BehaviorSubject.createDefault("")
-    override val profitString: BehaviorSubject<String> = BehaviorSubject.createDefault("")
-    override val markupString: BehaviorSubject<String> = BehaviorSubject.createDefault("")
+    //The steams that contain all updates to editText, from user or from calculations (or manually)
+    override val profitMarginFullString: BehaviorSubject<String> = BehaviorSubject.createDefault("")
+    override val salePriceFullString: BehaviorSubject<String> = BehaviorSubject.createDefault("")
+    override val profitFullString: BehaviorSubject<String> = BehaviorSubject.createDefault("")
+    override val markupFullString: BehaviorSubject<String> = BehaviorSubject.createDefault("")
+
+    override val fixedCost: PublishSubject<BigDecimal> = PublishSubject.create()
+    override val percentCost: PublishSubject<BigDecimal> = PublishSubject.create()
+
+    override val saveTemplateBtnClicked: PublishSubject<String> = PublishSubject.create()
+    override val settingsBtnClicked: PublishSubject<Unit> = PublishSubject.create()
+    //endregion
+
+    //region Output Variables
+    override val costList: BehaviorSubject<List<Cost>> = BehaviorSubject.createDefault(mutableListOf())
+    override val percentageList: BehaviorSubject<List<Percentage>> = BehaviorSubject.createDefault(mutableListOf())
+    override val templateList: Observable<List<Template>> = repo.getAllTemplate
+
+    //The streams that output the calculations as Strings and update texts
+    override val profitMarginOutput: BehaviorSubject<String> = profitMargin()
+    override val profitOutput: BehaviorSubject<String> = profit()
+    override val markupOutput: BehaviorSubject<String> = markup()
+    override val salePriceOutput: BehaviorSubject<String> = salePrice()
 
     override val clearCostNameAndCost: PublishSubject<Unit> = PublishSubject.create()
     override val clearPercentageNameAndCost: PublishSubject<Unit> = PublishSubject.create()
 
     override val profitMarginError: PublishSubject<Boolean> = PublishSubject.create()
 
-    override val templateList: Observable<List<Template>> = repo.getAllTemplate
-
-    override val saveTemplateBtnClicked: PublishSubject<String> = PublishSubject.create()
     override val showSaveDialog: PublishSubject<Unit> = PublishSubject.create()
     override val showLoadDialog: PublishSubject<Unit> = PublishSubject.create()
+    override val templateLoaded: PublishSubject<Unit> = PublishSubject.create()
+    //endregion
 
     private val templateObservableList = listOf(
-        repo.getAllCost,
-        repo.getAllPercentage,
-        markupString,
-        salePriceString,
-        profitString,
-        profitMarginString)
+        costList,
+        percentageList,
+        markupFullString,
+        salePriceFullString,
+        profitFullString,
+        profitMarginFullString)
 
     val outputs: CalculationViewModelOutputs = this
 
     //region logic
-    override fun templateClicked(template: Template) {
-        Toast.makeText(getApplication(), template.name, Toast.LENGTH_SHORT).show()
+    override fun templateClicked(template: Template, fromDialog: Boolean) {
+
+        costList.onNext(template.costList)
+        percentageList.onNext(template.percentageList)
+        onProfitMarginTextChangeByUser(template.profitMargin)
+        profitMarginOutput.onNext(template.profitMargin)
+
+        if (fromDialog) templateLoaded.onNext(Unit)
+
+    }
+
+    fun loadTemplate(): Observable<Template> {
+        val templateID: String = BaseApplication.sharedPref.get(SharePref.TEMPLATE_ID, UNSAVED_TEMPLATE_ID) as String
+        return repo.getTemplateById(templateID).observeOn(AndroidSchedulers.mainThread())
+    }
+
+    fun saveCurrentTemplateOnClose(){
+        combineLatest(templateObservableList){ observableList ->
+
+            val template = Template(
+                id = UNSAVED_TEMPLATE_ID,
+                name = UNSAVED_TEMPLATE_ID,
+                costList = (observableList[0] as List<Cost>),
+                percentageList = (observableList[1] as List<Percentage>),
+                markup = (observableList[2] as String),
+                salePrice = (observableList[3] as String),
+                profit = (observableList[4] as String),
+                profitMargin = (observableList[5] as String))
+
+            repo.updateTemplate(template)
+        }.subscribe()
+
+    }
+
+    private fun salePrice(): BehaviorSubject<String> {
+        val behaviorSubject = BehaviorSubject.createDefault("")
+        combineLatest(
+            markup,
+            fixedCost,
+            percentCost,
+            Function3<BigDecimal, BigDecimal, BigDecimal, String>{
+                    markup, fixedCost, percentCost ->
+                calculateSalePriceWithMarkup(markup, fixedCost, percentCost)
+            }).mergeWith(
+            combineLatest(
+                profit,
+                fixedCost,
+                percentCost,
+                Function3<BigDecimal, BigDecimal, BigDecimal, String> {
+                        profit, fixedCost, percentCost ->
+                    calculateSalePriceWithProfit(profit, fixedCost, percentCost)
+                })
+        ).mergeWith(
+            combineLatest(
+                profitMargin,
+                fixedCost,
+                percentCost,
+                Function3<BigDecimal, BigDecimal, BigDecimal, String> {
+                        profitMargin, fixedCost, percentCost ->
+                    calculateSalePriceWithProfitMargin(profitMargin, fixedCost, percentCost)
+                })
+        ).observeOn(AndroidSchedulers.mainThread()).subscribe(behaviorSubject)
+        return behaviorSubject
+    }
+
+    private fun markup(): BehaviorSubject<String> {
+        val behaviorSubject = BehaviorSubject.createDefault("")
+        combineLatest(
+            salePrice,
+            fixedCost,
+            percentCost,
+            Function3<BigDecimal, BigDecimal, BigDecimal, String> {
+                    salePrice, fixedCost, percentCost ->
+                calculateMarkupWithSalePrice(salePrice, fixedCost, percentCost)
+            }).mergeWith(
+            combineLatest(
+                profit,
+                fixedCost,
+                percentCost,
+                Function3<BigDecimal, BigDecimal, BigDecimal, String> {
+                        profit, fixedCost, percentCost ->
+                    calculateMarkupWithProfit(profit, fixedCost, percentCost)
+                })
+        ).mergeWith(
+            combineLatest(
+                profitMargin,
+                fixedCost,
+                percentCost,
+                Function3<BigDecimal, BigDecimal, BigDecimal, String> {
+                        profitMargin, fixedCost, percentCost ->
+                    calculateMarkupWithProfitMargin(profitMargin, fixedCost, percentCost)
+                })
+        ).observeOn(AndroidSchedulers.mainThread()).subscribe(behaviorSubject)
+        return behaviorSubject
+    }
+
+    private fun profit(): BehaviorSubject<String> {
+        val behaviorSubject = BehaviorSubject.createDefault("")
+        combineLatest(
+            salePrice,
+            fixedCost,
+            percentCost,
+            Function3<BigDecimal, BigDecimal, BigDecimal, String> {
+                    salePrice, fixedCost, percentCost ->
+                calculateProfitWithSalePrice(salePrice, fixedCost, percentCost)
+            }).mergeWith(
+            combineLatest(
+                markup,
+                fixedCost,
+                percentCost,
+                Function3<BigDecimal, BigDecimal, BigDecimal, String> {
+                        markup, fixedCost, percentCost ->
+                    calculateProfitWithMarkup(markup, fixedCost, percentCost)
+                })
+        ).mergeWith(
+            combineLatest(
+                profitMargin,
+                fixedCost,
+                percentCost,
+                Function3<BigDecimal, BigDecimal, BigDecimal, String> {
+                        profitMargin, fixedCost, percentCost ->
+                    calculateProfitWithProfitMargin(profitMargin, fixedCost, percentCost)
+                })
+        ).observeOn(AndroidSchedulers.mainThread()).subscribe(behaviorSubject)
+        return behaviorSubject
+    }
+
+    private fun profitMargin(): BehaviorSubject<String> {
+        val behaviorSubject = BehaviorSubject.createDefault("")
+        combineLatest(
+            salePrice,
+            fixedCost,
+            percentCost,
+            Function3<BigDecimal, BigDecimal, BigDecimal, String> {
+                    salePrice, fixedCost, percentCost ->
+
+                if(salePrice != BigDecimal.ZERO) calculateProfitMarginWithSalePrice(salePrice, fixedCost, percentCost)
+                else "Infinity"
+
+            }).mergeWith(
+            combineLatest(
+                markup,
+                fixedCost,
+                percentCost,
+                Function3<BigDecimal, BigDecimal, BigDecimal, String> {
+                        markup, fixedCost, percentCost ->
+
+                    if(fixedCost != BigDecimal.ZERO) calculateProfitMarginWithMarkup(markup, fixedCost, percentCost)
+                    else "Infinity"
+
+                })).mergeWith(
+            combineLatest(
+                profit,
+                fixedCost,
+                percentCost,
+                Function3<BigDecimal, BigDecimal, BigDecimal, String> {
+                        profit, fixedCost, percentCost ->
+
+                    if(fixedCost != BigDecimal.ZERO) calculateProfitMarginWithProfit(profit, fixedCost, percentCost)
+                    else "Infinity"
+                })
+        ).observeOn(AndroidSchedulers.mainThread()).subscribe(behaviorSubject)
+
+        return behaviorSubject
     }
     //endregion
 
     //region inputs
+    fun onSettingsBtnClicked(){
+        repo.deleteAllTemplates()
+        //settingsBtnClicked.onNext(Unit)
+    }
+
     fun onProfitMarginStringChanged(text: String){
-        profitMarginString.onNext(text)
+        profitMarginFullString.onNext(text)
     }
 
     fun onSalePriceStringChanged(text: String){
-        salePriceString.onNext(text)
+        salePriceFullString.onNext(text)
     }
 
     fun onProfitStringChanged(text: String){
-        profitString.onNext(text)
+        profitFullString.onNext(text)
     }
 
     fun onMarkupStringChanged(text: String){
-        markupString.onNext(text)
+        markupFullString.onNext(text)
     }
 
     fun onSaveTemplateBtnClicked(){
@@ -208,7 +398,7 @@ class CalculationViewModel(application: Application) :
     }
 
     override fun displayFixedCost(): Observable<String> {
-        return repo.getAllCost.map { costList ->
+        return costList.map { costList ->
             var total = BigDecimal.ZERO
             costList.forEach { cost -> total += toBigDecimal(cost.cost) }
             fixedCost.onNext(total)
@@ -217,7 +407,7 @@ class CalculationViewModel(application: Application) :
     }
 
     override fun displayPercentageCost(): Observable<String> {
-        return repo.getAllPercentage.map { percCost ->
+        return percentageList.map { percCost ->
             var total = BigDecimal.ZERO
             percCost.forEach { perc -> total += toBigDecimal(perc.cost) }
             percentCost.onNext(total)
@@ -240,142 +430,20 @@ class CalculationViewModel(application: Application) :
     }
 
     override fun insertCost(): Observable<Unit> {
-        return addCostBtnClicked.withLatestFrom(costName, costValue, Function3 {
-            _, name, value ->
+        return addCostBtnClicked.withLatestFrom(costName, costValue, costList,  Function4 {
+                _, name, value, list ->
             val cost = Cost(name = name, cost = value)
-            repo.insertCost(cost)
+            costList.onNext(list + cost)
         })
     }
 
     override fun insertPercentage(): Observable<Unit> {
-        return addPercentageBtnClicked.withLatestFrom(percentageName, percentageValue, Function3 {
-                _, name, value ->
+        return addPercentageBtnClicked.withLatestFrom(percentageName, percentageValue, percentageList ,Function4 {
+                _, name, value, list ->
             val percentage = Percentage(name = name, cost = value)
-            repo.insertPercentage(percentage)
+            percentageList.onNext(list + percentage)
         })
     }
 
-    override fun salePrice(): Observable<String> {
-        return combineLatest(
-            markup,
-            fixedCost,
-            percentCost,
-            Function3<BigDecimal, BigDecimal, BigDecimal, String>{
-                    markup, fixedCost, percentCost ->
-                calculateSalePriceWithMarkup(markup, fixedCost, percentCost)
-            }).mergeWith(
-            combineLatest(
-                profit,
-                fixedCost,
-                percentCost,
-                Function3<BigDecimal, BigDecimal, BigDecimal, String> {
-                        profit, fixedCost, percentCost ->
-                    calculateSalePriceWithProfit(profit, fixedCost, percentCost)
-                })
-        ).mergeWith(
-            combineLatest(
-                profitMargin,
-                fixedCost,
-                percentCost,
-                Function3<BigDecimal, BigDecimal, BigDecimal, String> {
-                        profitMargin, fixedCost, percentCost ->
-                    calculateSalePriceWithProfitMargin(profitMargin, fixedCost, percentCost)
-                })
-        ).observeOn(AndroidSchedulers.mainThread())
-    }
-
-    override fun markup(): Observable<String> {
-        return combineLatest(
-            salePrice,
-            fixedCost,
-            percentCost,
-            Function3<BigDecimal, BigDecimal, BigDecimal, String> {
-                    salePrice, fixedCost, percentCost ->
-                calculateMarkupWithSalePrice(salePrice, fixedCost, percentCost)
-            }).mergeWith(
-            combineLatest(
-                profit,
-                fixedCost,
-                percentCost,
-                Function3<BigDecimal, BigDecimal, BigDecimal, String> {
-                        profit, fixedCost, percentCost ->
-                    calculateMarkupWithProfit(profit, fixedCost, percentCost)
-                })
-        ).mergeWith(
-            combineLatest(
-                profitMargin,
-                fixedCost,
-                percentCost,
-                Function3<BigDecimal, BigDecimal, BigDecimal, String> {
-                        profitMargin, fixedCost, percentCost ->
-                    calculateMarkupWithProfitMargin(profitMargin, fixedCost, percentCost)
-                })
-        ).observeOn(AndroidSchedulers.mainThread())
-    }
-
-    override fun profit(): Observable<String> {
-         return combineLatest(
-            salePrice,
-            fixedCost,
-            percentCost,
-            Function3<BigDecimal, BigDecimal, BigDecimal, String> {
-                salePrice, fixedCost, percentCost ->
-                    calculateProfitWithSalePrice(salePrice, fixedCost, percentCost)
-            }).mergeWith(
-             combineLatest(
-                 markup,
-                 fixedCost,
-                 percentCost,
-                 Function3<BigDecimal, BigDecimal, BigDecimal, String> {
-                         markup, fixedCost, percentCost ->
-                     calculateProfitWithMarkup(markup, fixedCost, percentCost)
-                 })
-            ).mergeWith(
-             combineLatest(
-                 profitMargin,
-                 fixedCost,
-                 percentCost,
-                 Function3<BigDecimal, BigDecimal, BigDecimal, String> {
-                         profitMargin, fixedCost, percentCost ->
-                    calculateProfitWithProfitMargin(profitMargin, fixedCost, percentCost)
-                 })
-         ).observeOn(AndroidSchedulers.mainThread())
-    }
-
-    override fun profitMargin(): Observable<String> {
-        return combineLatest(
-            salePrice,
-            fixedCost,
-            percentCost,
-            Function3<BigDecimal, BigDecimal, BigDecimal, String> {
-                    salePrice, fixedCost, percentCost ->
-
-                    if(salePrice != BigDecimal.ZERO) calculateProfitMarginWithSalePrice(salePrice, fixedCost, percentCost)
-                    else "Infinity"
-
-            }).mergeWith(
-            combineLatest(
-                markup,
-                fixedCost,
-                percentCost,
-                Function3<BigDecimal, BigDecimal, BigDecimal, String> {
-                        markup, fixedCost, percentCost ->
-
-                    if(fixedCost != BigDecimal.ZERO) calculateProfitMarginWithMarkup(markup, fixedCost, percentCost)
-                    else "Infinity"
-
-                })).mergeWith(
-                combineLatest(
-                    profit,
-                    fixedCost,
-                    percentCost,
-                    Function3<BigDecimal, BigDecimal, BigDecimal, String> {
-                            profit, fixedCost, percentCost ->
-
-                        if(fixedCost != BigDecimal.ZERO) calculateProfitMarginWithProfit(profit, fixedCost, percentCost)
-                        else "Infinity"
-                    })
-        ).observeOn(AndroidSchedulers.mainThread())
-    }
     //endregion
 }

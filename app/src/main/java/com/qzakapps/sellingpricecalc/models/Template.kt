@@ -4,6 +4,8 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 import java.util.*
 
+const val UNSAVED_TEMPLATE_ID = "Unsaved"
+
 @Entity
 data class Template (
     @PrimaryKey

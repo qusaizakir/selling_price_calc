@@ -6,7 +6,6 @@
     android:layout_height="match_parent"
     android:layout_width="match_parent">
 
-
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/calculation"
         android:layout_width="match_parent"
@@ -108,15 +107,35 @@
                 android:text="@string/add" />
         </LinearLayout>
 
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/calculationCostListRV"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:scrollbars="vertical"
+            android:fadeScrollbars="false"
+            android:layout_margin="16dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/calculationCostLL"
+            app:layout_constraintBottom_toTopOf="@id/costGuideLine"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"/>
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/costGuideLine"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            app:layout_constraintGuide_percent="0.35" />
+
         <include
             android:id="@+id/cost_percentage_divider"
             android:layout_height="1dp"
             android:layout_width="match_parent"
-            android:layout_marginTop="16dp"
             android:layout_marginStart="16dp"
             android:layout_marginEnd="16dp"
             layout="@layout/divider"
-            app:layout_constraintTop_toBottomOf="@id/calculationCostLL"
+            app:layout_constraintTop_toTopOf="@id/costGuideLine"
+            app:layout_constraintBottom_toBottomOf="@+id/costGuideLine"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             />
@@ -130,7 +149,7 @@
             android:text="@string/percentage_fee"
             android:layout_marginStart="16dp"
             android:layout_marginTop="8dp"
-            app:layout_constraintTop_toBottomOf="@id/cost_percentage_divider"
+            app:layout_constraintTop_toBottomOf="@id/costGuideLine"
             app:layout_constraintStart_toStartOf="parent"/>
 
         <TextView
@@ -205,53 +224,52 @@
                 android:text="@string/add" />
         </LinearLayout>
 
-        <LinearLayout
-            android:id="@+id/calculationTabPagerLL"
-            android:layout_height="wrap_content"
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/calculationPercentageListRV"
             android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:maxHeight="200dp"
+            android:scrollbars="vertical"
+            android:fadeScrollbars="false"
             android:layout_margin="16dp"
-            android:orientation="vertical"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@id/calculationPercentageLL"
-            app:layout_constraintBottom_toTopOf="@id/calculationCostTotalTitleTv">
+            app:layout_constraintBottom_toBottomOf="@id/percentGuideLine"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"/>
 
-            <com.google.android.material.tabs.TabLayout
-                android:id="@+id/calculationTabLayout"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
-
-            <androidx.viewpager2.widget.ViewPager2
-                android:id="@+id/calculationPager"
-                android:layout_width="match_parent"
-                android:layout_height="200dp" />
-
-        </LinearLayout>
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/percentGuideLine"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            app:layout_constraintGuide_percent="0.70"/>
 
         <include
-            android:id="@+id/pager_total_divider"
+            android:id="@+id/percentage_divider"
             android:layout_height="1dp"
             android:layout_width="match_parent"
-            android:layout_marginTop="16dp"
             android:layout_marginStart="16dp"
             android:layout_marginEnd="16dp"
             layout="@layout/divider"
-            app:layout_constraintTop_toBottomOf="@id/calculationTabPagerLL"
+            app:layout_constraintTop_toTopOf="@id/percentGuideLine"
+            app:layout_constraintBottom_toBottomOf="@+id/percentGuideLine"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             />
 
         <TextView
             android:id="@+id/calculationCostTotalTitleTv"
+            style="@style/TotalTitleText"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_margin="16dp"
-            style="@style/TotalTitleText"
             android:text="@string/cost_total"
+            app:layout_constraintEnd_toStartOf="@id/calculationCostTotalTv"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/calculationTabPagerLL"
-            app:layout_constraintBottom_toTopOf="@id/calculationPercentageTotalTitleTv"
-            app:layout_constraintEnd_toStartOf="@id/calculationCostTotalTv"/>
+            app:layout_constraintTop_toBottomOf="@id/percentGuideLine"
+            app:layout_constraintVertical_bias="0.51" />
 
         <TextView
             android:id="@+id/calculationPercentageTotalTitleTv"
@@ -263,7 +281,6 @@
             android:text="@string/percentage_fee_total"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/calculationCostTotalTitleTv"
-            app:layout_constraintBottom_toTopOf="@id/calculationMarkupTi"
             app:layout_constraintEnd_toStartOf="@id/calculationPercentageTotalTv"/>
 
 
@@ -298,8 +315,9 @@
             android:hint="@string/profit_margin"
             android:layout_marginStart="8dp"
             android:layout_marginBottom="8dp"
-            app:layout_constraintBottom_toTopOf="@id/calculationSaveBtn"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@id/calculationProfitTi"
+            app:layout_constraintBottom_toBottomOf="@id/calculationProfitTi"
             app:layout_constraintStart_toEndOf="@id/calculationProfitTi">
 
             <com.google.android.material.textfield.TextInputEditText
@@ -316,10 +334,11 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
+            android:hint="@string/sale_price"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintBottom_toTopOf="@id/calculationProfitMarginTi"
             app:layout_constraintStart_toEndOf="@id/calculationMarkupTi"
-            android:hint="@string/sale_price">
+            app:layout_constraintTop_toTopOf="@+id/calculationMarkupTi"
+            app:layout_constraintBottom_toBottomOf="@id/calculationMarkupTi">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/calculationSalePriceEt"
@@ -335,8 +354,9 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginEnd="8dp"
+            android:layout_marginTop="16dp"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintBottom_toTopOf="@id/calculationProfitTi"
+            app:layout_constraintTop_toBottomOf="@id/calculationPercentageTotalTitleTv"
             app:layout_constraintEnd_toStartOf="@id/calculationSalePriceTi"
             android:hint="@string/markup">
 
@@ -354,11 +374,10 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginEnd="8dp"
-            android:layout_marginBottom="8dp"
-            app:layout_constraintStart_toStartOf="parent"
+            android:hint="@string/profit"
             app:layout_constraintEnd_toStartOf="@id/calculationProfitMarginTi"
-            app:layout_constraintBottom_toTopOf="@id/calculationSaveBtn"
-            android:hint="@string/profit">
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/calculationMarkupTi">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/calculationProfitEt"
