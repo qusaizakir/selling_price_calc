@@ -10,7 +10,7 @@ class BaseApplication : Application() {
     }
 
     override fun onCreate() {
-        sharedPref = SharePref(applicationContext)
+        SharePref.init(applicationContext)
         super.onCreate()
     }
 }

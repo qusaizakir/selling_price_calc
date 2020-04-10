@@ -13,6 +13,8 @@ import com.qzakapps.sellingpricecalc.adapters.CalculationLoadTemplateRecyclerAda
 import com.qzakapps.sellingpricecalc.adapters.CalculationPercentageRecyclerAdapter
 import com.qzakapps.sellingpricecalc.helper.clearText
 import com.qzakapps.sellingpricecalc.viewmodels.CalculationViewModel
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.calculation_fragment.*
 import kotlinx.android.synthetic.main.calculation_load_dialog.view.*
 import kotlinx.android.synthetic.main.calculation_save_dialog.view.*
@@ -68,8 +70,8 @@ class CalculationFragment : BaseFragment<CalculationViewModel>() {
         createLoadDialog()
         createSaveDialog()
 
-        //Load Template
-        viewModel.loadTemplate().subscribe { template -> viewModel.templateClicked(template, false)}.autoDispose()
+        //Load Template (returns a single, so will only execute once)
+        viewModel.loadTemplate().subscribeOn(Schedulers.io()).subscribe { template -> viewModel.templateClicked(template, false) }.autoDispose()
 
         //region inputs
         calculationCostNameEt.doAfterTextChanged { text -> viewModel.onCostNameTextChange(text.toString())}
@@ -133,11 +135,12 @@ class CalculationFragment : BaseFragment<CalculationViewModel>() {
         viewModel.outputs.showSaveDialog.subscribe { saveDialog?.show() }.autoDispose()
         viewModel.outputs.showLoadDialog.subscribe { loadDialog?.show() }.autoDispose()
 
-        viewModel.outputs.templateList.subscribe{ templateList -> loadTemplateDialogAdapter.setData(templateList)}.autoDispose()
+        viewModel.outputs.templateList.observeOn(AndroidSchedulers.mainThread()).subscribe{ templateList -> loadTemplateDialogAdapter.setData(templateList)}.autoDispose()
         viewModel.outputs.templateLoaded.subscribe{
             loadDialog?.dismiss()
             Toast.makeText(context, "Loaded Template", Toast.LENGTH_SHORT).show()
         }.autoDispose()
+        viewModel.changeTemplateName.subscribe {t ->  calculationTemplateTitleTv.text = t }.autoDispose()
         //endregion
 
     }
@@ -145,7 +148,6 @@ class CalculationFragment : BaseFragment<CalculationViewModel>() {
     override fun onPause() {
         viewModel.saveCurrentTemplateOnClose()
         super.onPause()
-
     }
 
     private fun createSaveDialog() {

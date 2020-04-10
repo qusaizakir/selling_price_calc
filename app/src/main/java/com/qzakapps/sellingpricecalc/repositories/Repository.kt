@@ -8,6 +8,7 @@ import com.qzakapps.sellingpricecalc.models.Percentage
 import com.qzakapps.sellingpricecalc.models.Template
 import io.reactivex.Completable
 import io.reactivex.Observable
+import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
 
 class Repository(
@@ -87,7 +88,7 @@ class Repository(
             .subscribe()
     }
 
-    fun getTemplateById(id: String): Observable<Template>{
+    fun getTemplateById(id: String): Single<Template>{
         return templateDao.getTemplateById(id)
     }
     //endregion

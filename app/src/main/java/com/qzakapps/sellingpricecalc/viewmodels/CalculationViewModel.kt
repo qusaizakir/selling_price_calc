@@ -1,15 +1,14 @@
 package com.qzakapps.sellingpricecalc.viewmodels
 
 import android.app.Application
-import com.qzakapps.sellingpricecalc.BaseApplication
 import com.qzakapps.sellingpricecalc.adapters.CalculationLoadTemplateRecyclerAdapter
 import com.qzakapps.sellingpricecalc.helper.*
 import com.qzakapps.sellingpricecalc.models.Cost
 import com.qzakapps.sellingpricecalc.models.Percentage
 import com.qzakapps.sellingpricecalc.models.Template
-import com.qzakapps.sellingpricecalc.models.UNSAVED_TEMPLATE_ID
 import io.reactivex.Observable
 import io.reactivex.Observable.combineLatest
+import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.functions.BiFunction
 import io.reactivex.functions.Function3
@@ -69,6 +68,7 @@ interface CalculationViewModelOutputs {
     val showSaveDialog: Observable<Unit>
     val showLoadDialog: Observable<Unit>
     val templateLoaded: Observable<Unit>
+    val changeTemplateName: BehaviorSubject<String>
 }
 
 class CalculationViewModel(application: Application) :
@@ -124,6 +124,7 @@ class CalculationViewModel(application: Application) :
     override val showSaveDialog: PublishSubject<Unit> = PublishSubject.create()
     override val showLoadDialog: PublishSubject<Unit> = PublishSubject.create()
     override val templateLoaded: PublishSubject<Unit> = PublishSubject.create()
+    override val changeTemplateName: BehaviorSubject<String> = BehaviorSubject.createDefault("")
     //endregion
 
     private val templateObservableList = listOf(
@@ -143,22 +144,29 @@ class CalculationViewModel(application: Application) :
         percentageList.onNext(template.percentageList)
         onProfitMarginTextChangeByUser(template.profitMargin)
         profitMarginOutput.onNext(template.profitMargin)
+        changeTemplateName.onNext(template.name)
+        SharePref.templateID = template.id
+        SharePref.templateName = template.name
 
-        if (fromDialog) templateLoaded.onNext(Unit)
+        if (fromDialog) {
+            templateLoaded.onNext(Unit)
+            SharePref.templateName
+        }
 
     }
 
-    fun loadTemplate(): Observable<Template> {
-        val templateID: String = BaseApplication.sharedPref.get(SharePref.TEMPLATE_ID, UNSAVED_TEMPLATE_ID) as String
-        return repo.getTemplateById(templateID).observeOn(AndroidSchedulers.mainThread())
+    //Use the sharedPref to find the current template to load
+    fun loadTemplate(): Single<Template> {
+        return repo.getTemplateById(SharePref.templateID).observeOn(AndroidSchedulers.mainThread())
     }
 
+    //Save all changes to the current working template, uses shared pref to save template ID/Name
     fun saveCurrentTemplateOnClose(){
         combineLatest(templateObservableList){ observableList ->
 
             val template = Template(
-                id = UNSAVED_TEMPLATE_ID,
-                name = UNSAVED_TEMPLATE_ID,
+                id = SharePref.templateID,
+                name = SharePref.templateName,
                 costList = (observableList[0] as List<Cost>),
                 percentageList = (observableList[1] as List<Percentage>),
                 markup = (observableList[2] as String),

@@ -11,17 +11,18 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/calculationLoadBtn"
-            android:visibility="gone"
-            android:layout_width="match_parent"
+        <TextView
+            android:id="@+id/calculationTemplateTitleTv"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_margin="16dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginStart="16dp"
+            style="@style/TitleText"
+            android:textSize="28sp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            android:text="@string/load_template"
-            />
+            app:layout_constraintTop_toTopOf="parent"/>
 
         <TextView
             android:id="@+id/calculationCostTitleTv"
@@ -31,7 +32,7 @@
             android:text="@string/cost"
             android:layout_marginTop="16dp"
             android:layout_marginStart="16dp"
-            app:layout_constraintTop_toBottomOf="@id/calculationLoadBtn"
+            app:layout_constraintTop_toBottomOf="@id/calculationTemplateTitleTv"
             app:layout_constraintStart_toStartOf="parent"/>
 
         <TextView
@@ -125,7 +126,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            app:layout_constraintGuide_percent="0.35" />
+            app:layout_constraintGuide_percent="0.38" />
 
         <include
             android:id="@+id/cost_percentage_divider"
@@ -244,7 +245,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            app:layout_constraintGuide_percent="0.70"/>
+            app:layout_constraintGuide_percent="0.71"/>
 
         <include
             android:id="@+id/percentage_divider"

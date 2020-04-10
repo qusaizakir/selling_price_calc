@@ -3,6 +3,7 @@ package com.qzakapps.sellingpricecalc.dao
 import androidx.room.*
 import com.qzakapps.sellingpricecalc.models.Template
 import io.reactivex.Observable
+import io.reactivex.Single
 
 
 @Dao
@@ -21,5 +22,5 @@ interface TemplateDao {
     fun deleteAllTemplates()
 
     @Query("SELECT * FROM Template WHERE :id = id")
-    fun getTemplateById(id: String): Observable<Template>
+    fun getTemplateById(id: String): Single<Template>
 }

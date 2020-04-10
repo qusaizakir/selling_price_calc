@@ -14,7 +14,7 @@ import com.qzakapps.sellingpricecalc.models.Percentage
 import com.qzakapps.sellingpricecalc.models.Template
 
 
-@Database(entities = [Cost::class, Percentage::class, Template::class], version = 2, exportSchema = false)
+@Database(entities = [Cost::class, Percentage::class, Template::class], version = 2, exportSchema = true)
 @TypeConverters(Converters::class)
 abstract class AppDatabase : RoomDatabase() {
 
@@ -38,6 +38,7 @@ abstract class AppDatabase : RoomDatabase() {
                     "database"
                 )
                     .fallbackToDestructiveMigration()
+                    .createFromAsset("database.db")
                     .build()
                 INSTANCE = instance
                 return instance
