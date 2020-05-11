@@ -88,7 +88,7 @@ class Repository(
             .subscribe()
     }
 
-    fun getTemplateById(id: String): Single<Template>{
+    fun getTemplateById(id: String): Observable<Template>{
         return templateDao.getTemplateById(id)
     }
     //endregion

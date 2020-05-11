@@ -11,6 +11,8 @@ data class Template (
     @PrimaryKey
     val id: String = UUID.randomUUID().toString(),
     val name: String,
+    val singleCost: String,
+    val singlePercentage: String,
     val costList: List<Cost>,
     val percentageList: List<Percentage>,
     val markup: String,

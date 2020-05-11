@@ -3,34 +3,25 @@ package com.qzakapps.sellingpricecalc.viewmodels
 import android.app.Application
 import com.qzakapps.sellingpricecalc.adapters.CalculationLoadTemplateRecyclerAdapter
 import com.qzakapps.sellingpricecalc.helper.*
-import com.qzakapps.sellingpricecalc.models.Cost
-import com.qzakapps.sellingpricecalc.models.Percentage
-import com.qzakapps.sellingpricecalc.models.Template
+import com.qzakapps.sellingpricecalc.models.*
 import io.reactivex.Observable
 import io.reactivex.Observable.combineLatest
 import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.functions.BiFunction
 import io.reactivex.functions.Function3
-import io.reactivex.functions.Function4
 import io.reactivex.subjects.BehaviorSubject
 import io.reactivex.subjects.PublishSubject
 import java.math.BigDecimal
 
 interface CalculationViewModelInputs {
-    val addCostBtnClicked: PublishSubject<Boolean>
-    val costName: BehaviorSubject<String>
-    val costValue: BehaviorSubject<String>
-
-    val addPercentageBtnClicked: PublishSubject<Boolean>
-    val percentageName: BehaviorSubject<String>
-    val percentageValue: BehaviorSubject<String>
-
     val profitMargin: PublishSubject<BigDecimal>
     val salePrice: PublishSubject<BigDecimal>
     val profit: PublishSubject<BigDecimal>
     val markup: PublishSubject<BigDecimal>
 
+    val singleCostFullString: BehaviorSubject<String>
+    val singlePercentageFullString: BehaviorSubject<String>
     val profitMarginFullString: BehaviorSubject<String>
     val salePriceFullString: BehaviorSubject<String>
     val profitFullString: BehaviorSubject<String>
@@ -44,19 +35,17 @@ interface CalculationViewModelInputs {
 }
 
 interface CalculationViewModelOutputs {
-    fun insertCost(): Observable<Unit>
-    fun insertPercentage(): Observable<Unit>
+
     val costList: BehaviorSubject<List<Cost>>
     val percentageList: BehaviorSubject<List<Percentage>>
     val templateList: Observable<List<Template>>
-    val clearCostNameAndCost: Observable<Unit>
-    val clearPercentageNameAndCost: Observable<Unit>
-    fun costBtnEnabled(): Observable<Boolean>
-    fun percentageBtnEnabled(): Observable<Boolean>
 
     fun displayFixedCost(): Observable<String>
     fun displayPercentageCost(): Observable<String>
 
+
+    val singleCostOutput: BehaviorSubject<String>
+    val singlePercentageOutput: BehaviorSubject<String>
     val profitMarginOutput: BehaviorSubject<String>
     val profitOutput: BehaviorSubject<String>
     val salePriceOutput: BehaviorSubject<String>
@@ -68,7 +57,6 @@ interface CalculationViewModelOutputs {
     val showSaveDialog: Observable<Unit>
     val showLoadDialog: Observable<Unit>
     val templateLoaded: Observable<Unit>
-    val changeTemplateName: BehaviorSubject<String>
 }
 
 class CalculationViewModel(application: Application) :
@@ -78,13 +66,6 @@ class CalculationViewModel(application: Application) :
     CalculationLoadTemplateRecyclerAdapter.TemplateClicked {
 
     //region Input Variables
-    override val addCostBtnClicked: PublishSubject<Boolean> = PublishSubject.create()
-    override val costName: BehaviorSubject<String> = BehaviorSubject.createDefault("")
-    override val costValue: BehaviorSubject<String> = BehaviorSubject.createDefault("")
-
-    override val addPercentageBtnClicked: PublishSubject<Boolean> = PublishSubject.create()
-    override val percentageName: BehaviorSubject<String> = BehaviorSubject.createDefault("")
-    override val percentageValue: BehaviorSubject<String> = BehaviorSubject.createDefault("")
 
     //The streams that contain input values that only emit when xTextChangeByUser is called
     override val profitMargin: PublishSubject<BigDecimal> = PublishSubject.create()
@@ -93,6 +74,9 @@ class CalculationViewModel(application: Application) :
     override val markup: PublishSubject<BigDecimal> = PublishSubject.create()
 
     //The steams that contain all updates to editText, from user or from calculations (or manually)
+
+    override val singleCostFullString: BehaviorSubject<String> = BehaviorSubject.createDefault("")
+    override val singlePercentageFullString: BehaviorSubject<String> = BehaviorSubject.createDefault("")
     override val profitMarginFullString: BehaviorSubject<String> = BehaviorSubject.createDefault("")
     override val salePriceFullString: BehaviorSubject<String> = BehaviorSubject.createDefault("")
     override val profitFullString: BehaviorSubject<String> = BehaviorSubject.createDefault("")
@@ -111,25 +95,26 @@ class CalculationViewModel(application: Application) :
     override val templateList: Observable<List<Template>> = repo.getAllTemplate
 
     //The streams that output the calculations as Strings and update texts
+
+    override val singleCostOutput: BehaviorSubject<String> = BehaviorSubject.createDefault("")
+    override val singlePercentageOutput: BehaviorSubject<String> = BehaviorSubject.createDefault("")
     override val profitMarginOutput: BehaviorSubject<String> = profitMargin()
     override val profitOutput: BehaviorSubject<String> = profit()
     override val markupOutput: BehaviorSubject<String> = markup()
     override val salePriceOutput: BehaviorSubject<String> = salePrice()
-
-    override val clearCostNameAndCost: PublishSubject<Unit> = PublishSubject.create()
-    override val clearPercentageNameAndCost: PublishSubject<Unit> = PublishSubject.create()
 
     override val profitMarginError: PublishSubject<Boolean> = PublishSubject.create()
 
     override val showSaveDialog: PublishSubject<Unit> = PublishSubject.create()
     override val showLoadDialog: PublishSubject<Unit> = PublishSubject.create()
     override val templateLoaded: PublishSubject<Unit> = PublishSubject.create()
-    override val changeTemplateName: BehaviorSubject<String> = BehaviorSubject.createDefault("")
     //endregion
 
     private val templateObservableList = listOf(
         costList,
         percentageList,
+        singleCostFullString,
+        singlePercentageFullString,
         markupFullString,
         salePriceFullString,
         profitFullString,
@@ -142,26 +127,28 @@ class CalculationViewModel(application: Application) :
 
         costList.onNext(template.costList)
         percentageList.onNext(template.percentageList)
+
+        singleCostOutput.onNext(template.singleCost)
+        singlePercentageOutput.onNext(template.singlePercentage)
+
         onProfitMarginTextChangeByUser(template.profitMargin)
         profitMarginOutput.onNext(template.profitMargin)
-        changeTemplateName.onNext(template.name)
         SharePref.templateID = template.id
         SharePref.templateName = template.name
 
         if (fromDialog) {
             templateLoaded.onNext(Unit)
-            SharePref.templateName
         }
 
     }
 
     //Use the sharedPref to find the current template to load
-    fun loadTemplate(): Single<Template> {
+    fun loadTemplate(): Observable<Template> {
         return repo.getTemplateById(SharePref.templateID).observeOn(AndroidSchedulers.mainThread())
     }
 
     //Save all changes to the current working template, uses shared pref to save template ID/Name
-    fun saveCurrentTemplateOnClose(){
+    fun saveCurrentTemplate(){
         combineLatest(templateObservableList){ observableList ->
 
             val template = Template(
@@ -169,14 +156,15 @@ class CalculationViewModel(application: Application) :
                 name = SharePref.templateName,
                 costList = (observableList[0] as List<Cost>),
                 percentageList = (observableList[1] as List<Percentage>),
-                markup = (observableList[2] as String),
-                salePrice = (observableList[3] as String),
-                profit = (observableList[4] as String),
-                profitMargin = (observableList[5] as String))
+                singleCost = observableList[2] as String,
+                singlePercentage = observableList[3] as String,
+                markup = (observableList[4] as String),
+                salePrice = (observableList[5] as String),
+                profit = (observableList[6] as String),
+                profitMargin = (observableList[7] as String))
 
-            repo.updateTemplate(template)
+            repo.insertTemplate(template)
         }.subscribe()
-
     }
 
     private fun salePrice(): BehaviorSubject<String> {
@@ -314,8 +302,16 @@ class CalculationViewModel(application: Application) :
 
     //region inputs
     fun onSettingsBtnClicked(){
-        repo.deleteAllTemplates()
-        //settingsBtnClicked.onNext(Unit)
+        settingsBtnClicked.onNext(Unit)
+        repo.insertCost(Cost(cost = "12", name = "weleve"))
+    }
+
+    fun onSingleCostStringChanged(text: String){
+        singleCostFullString.onNext(text)
+    }
+
+    fun onSinglePercentageChanged(text: String){
+        singlePercentageFullString.onNext(text)
     }
 
     fun onProfitMarginStringChanged(text: String){
@@ -340,32 +336,6 @@ class CalculationViewModel(application: Application) :
 
     fun onLoadTemplateBtnClicked(){
         showLoadDialog.onNext(Unit)
-    }
-
-    fun onAddCostBtnClicked(){
-        addCostBtnClicked.onNext(true)
-        clearCostNameAndCost.onNext(Unit)
-    }
-
-    fun onCostNameTextChange(text: String){
-        costName.onNext(text)
-    }
-
-    fun onCostValueTextChange(text: String){
-        costValue.onNext(text)
-    }
-
-    fun onAddPercentageBtnClicked(){
-        addPercentageBtnClicked.onNext(true)
-        clearPercentageNameAndCost.onNext(Unit)
-    }
-
-    fun onPercentageNameTextChange(text: String){
-        percentageName.onNext(text)
-    }
-
-    fun onPercentageValueTextChange(text: String){
-        percentageValue.onNext(text)
     }
 
     fun onProfitMarginTextChangeByUser(text: String) {
@@ -396,17 +366,22 @@ class CalculationViewModel(application: Application) :
                 name = (observableList[0] as String),
                 costList = (observableList[1] as List<Cost>),
                 percentageList = (observableList[2] as List<Percentage>),
-                markup = (observableList[3] as String),
-                salePrice = (observableList[4] as String),
-                profit = (observableList[5] as String),
-                profitMargin = (observableList[6] as String))
+                singleCost = observableList[2] as String,
+                singlePercentage = observableList[3] as String,
+                markup = (observableList[4] as String),
+                salePrice = (observableList[5] as String),
+                profit = (observableList[6] as String),
+                profitMargin = (observableList[7] as String))
 
             repo.insertTemplate(template)
+            templateClicked(template, true)
         }
     }
 
     override fun displayFixedCost(): Observable<String> {
-        return costList.map { costList ->
+        return combineLatest(costList, singleCostFullString, BiFunction<List<Cost>, String, List<Cost>> { costList, singleCost ->
+            costList + Cost(name = SINGLE_COST, cost = singleCost)
+        }).map { costList ->
             var total = BigDecimal.ZERO
             costList.forEach { cost -> total += toBigDecimal(cost.cost) }
             fixedCost.onNext(total)
@@ -415,42 +390,14 @@ class CalculationViewModel(application: Application) :
     }
 
     override fun displayPercentageCost(): Observable<String> {
-        return percentageList.map { percCost ->
+        return combineLatest(percentageList, singlePercentageFullString, BiFunction<List<Percentage>, String, List<Percentage>> { percList, singlePerc ->
+            percList + Percentage(name = SINGLE_PERCENTAGE, cost = singlePerc)
+        }).map { percCost ->
             var total = BigDecimal.ZERO
             percCost.forEach { perc -> total += toBigDecimal(perc.cost) }
             percentCost.onNext(total)
             return@map total.toString()
         }.observeOn(AndroidSchedulers.mainThread())
-    }
-
-    override fun costBtnEnabled(): Observable<Boolean> {
-        return combineLatest(
-            costName,
-            costValue,
-            BiFunction<String, String, Boolean> { name, value -> name.isNotEmpty() && value.isNotEmpty() })
-    }
-
-    override fun percentageBtnEnabled(): Observable<Boolean> {
-        return combineLatest(
-            percentageName,
-            percentageValue,
-            BiFunction<String, String, Boolean> { name, value -> name.isNotEmpty() && value.isNotEmpty() })
-    }
-
-    override fun insertCost(): Observable<Unit> {
-        return addCostBtnClicked.withLatestFrom(costName, costValue, costList,  Function4 {
-                _, name, value, list ->
-            val cost = Cost(name = name, cost = value)
-            costList.onNext(list + cost)
-        })
-    }
-
-    override fun insertPercentage(): Observable<Unit> {
-        return addPercentageBtnClicked.withLatestFrom(percentageName, percentageValue, percentageList ,Function4 {
-                _, name, value, list ->
-            val percentage = Percentage(name = name, cost = value)
-            percentageList.onNext(list + percentage)
-        })
     }
 
     //endregion

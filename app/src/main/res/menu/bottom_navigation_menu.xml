@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/costListMenuItem"
+        android:title="@string/cost"
+        android:icon="@drawable/ic_dollar_24px"
+        app:iconTint="@color/colorAccent"/>
+    <item
+        android:id="@+id/calculationMenuItem"
+        android:title="@string/calculation"
+        android:icon="@drawable/ic_dialpad_24px"
+        app:iconTint="@color/colorAccent"/>
+    <item
+        android:id="@+id/percentageListMenuItem"
+        android:title="@string/percentage"
+        android:icon="@drawable/ic_percentage_24"
+        app:iconTint="@color/colorAccent"/>
+</menu>

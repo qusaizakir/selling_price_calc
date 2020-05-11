@@ -11,7 +11,6 @@ import com.qzakapps.sellingpricecalc.R
 import com.qzakapps.sellingpricecalc.adapters.CalculationCostRecyclerAdapter
 import com.qzakapps.sellingpricecalc.adapters.CalculationLoadTemplateRecyclerAdapter
 import com.qzakapps.sellingpricecalc.adapters.CalculationPercentageRecyclerAdapter
-import com.qzakapps.sellingpricecalc.helper.clearText
 import com.qzakapps.sellingpricecalc.viewmodels.CalculationViewModel
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
@@ -70,18 +69,9 @@ class CalculationFragment : BaseFragment<CalculationViewModel>() {
         createLoadDialog()
         createSaveDialog()
 
-        //Load Template (returns a single, so will only execute once)
-        viewModel.loadTemplate().subscribeOn(Schedulers.io()).subscribe { template -> viewModel.templateClicked(template, false) }.autoDispose()
-
         //region inputs
-        calculationCostNameEt.doAfterTextChanged { text -> viewModel.onCostNameTextChange(text.toString())}
-        calculationCostValueEt.doAfterTextChanged { text -> viewModel.onCostValueTextChange(text.toString())}
-        calculationPercentageNameEt.doAfterTextChanged { text -> viewModel.onPercentageNameTextChange(text.toString())}
-        calculationPercentageValueEt.doAfterTextChanged { text -> viewModel.onPercentageValueTextChange(text.toString())}
-
-        calculationAddCostBtn.setOnClickListener { viewModel.onAddCostBtnClicked()}
-        calculationAddPercentageBtn.setOnClickListener { viewModel.onAddPercentageBtnClicked()}
-        calculationSaveBtn.setOnClickListener {viewModel.onSaveTemplateBtnClicked()}
+        calculationCostEt.doAfterTextChanged { text -> if(calculationCostEt.hasFocus()) viewModel.onSingleCostStringChanged(text.toString())}
+        calculationPercentageEt.doAfterTextChanged { text -> if(calculationPercentageEt.hasFocus()) viewModel.onSinglePercentageChanged(text.toString())  }
 
         calculationProfitMarginEt.doAfterTextChanged { text ->
             if(calculationProfitMarginEt.hasFocus()) { viewModel.onProfitMarginTextChangeByUser(text.toString()) }
@@ -102,23 +92,11 @@ class CalculationFragment : BaseFragment<CalculationViewModel>() {
         //endregion
 
         //region outputs
-        viewModel.outputs.costBtnEnabled().subscribe {enabled -> calculationAddCostBtn.isEnabled = enabled}.autoDispose()
-        viewModel.outputs.percentageBtnEnabled().subscribe {enabled -> calculationAddPercentageBtn.isEnabled = enabled}.autoDispose()
-
-        viewModel.outputs.insertCost().subscribe { Toast.makeText(context, R.string.add_cost_toast, Toast.LENGTH_SHORT).show()}.autoDispose()
-        viewModel.outputs.insertPercentage().subscribe { Toast.makeText(context, R.string.add_percentage_toast, Toast.LENGTH_SHORT).show()}.autoDispose()
-
         viewModel.outputs.costList.subscribe { costList -> costAdapter.setData(costList)}.autoDispose()
         viewModel.outputs.percentageList.subscribe{ percentageList -> percentageAdapter.setData(percentageList)}.autoDispose()
 
-        viewModel.outputs.clearCostNameAndCost.subscribe {
-            calculationCostNameEt.clearText(); calculationCostNameEt.clearFocus()
-            calculationCostValueEt.clearText(); calculationCostValueEt.clearFocus()
-        }.autoDispose()
-        viewModel.outputs.clearPercentageNameAndCost.subscribe{
-            calculationPercentageNameEt.clearText(); calculationPercentageNameEt.clearFocus()
-            calculationPercentageValueEt.clearText(); calculationPercentageValueEt.clearFocus()
-        }.autoDispose()
+        viewModel.singleCostOutput.subscribe{t -> calculationCostEt.setText(t)}.autoDispose()
+        viewModel.singlePercentageOutput.subscribe{t -> calculationPercentageEt.setText(t)}.autoDispose()
 
         viewModel.outputs.salePriceOutput.subscribe { t -> calculationSalePriceEt.setText(t)}.autoDispose()
         viewModel.outputs.markupOutput.subscribe { t -> calculationMarkupEt.setText(t)}.autoDispose()
@@ -137,17 +115,25 @@ class CalculationFragment : BaseFragment<CalculationViewModel>() {
 
         viewModel.outputs.templateList.observeOn(AndroidSchedulers.mainThread()).subscribe{ templateList -> loadTemplateDialogAdapter.setData(templateList)}.autoDispose()
         viewModel.outputs.templateLoaded.subscribe{
-            loadDialog?.dismiss()
-            Toast.makeText(context, "Loaded Template", Toast.LENGTH_SHORT).show()
+            if(loadDialog?.isShowing == true){
+                loadDialog?.dismiss()
+                Toast.makeText(context, "Loaded Template", Toast.LENGTH_SHORT).show()
+            }
         }.autoDispose()
-        viewModel.changeTemplateName.subscribe {t ->  calculationTemplateTitleTv.text = t }.autoDispose()
         //endregion
 
     }
 
     override fun onPause() {
-        viewModel.saveCurrentTemplateOnClose()
+        viewModel.saveCurrentTemplate()
         super.onPause()
+    }
+
+    override fun onResume() {
+        viewModel.loadTemplate().subscribeOn(Schedulers.io()).subscribe {
+                template ->  viewModel.templateClicked(template)
+            Toast.makeText(context, template.name + "", Toast.LENGTH_SHORT).show()}.autoDispose()
+        super.onResume()
     }
 
     private fun createSaveDialog() {
