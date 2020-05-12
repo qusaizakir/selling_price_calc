@@ -2,4 +2,5 @@
 <resources>
     <dimen name="calculation_start_margin">16dp</dimen>
     <dimen name="calculation_end_margin">16dp</dimen>
+    <dimen name="list_fab_height">16dp</dimen>
 </resources>

@@ -6,7 +6,6 @@ import com.qzakapps.sellingpricecalc.helper.*
 import com.qzakapps.sellingpricecalc.models.*
 import io.reactivex.Observable
 import io.reactivex.Observable.combineLatest
-import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.functions.BiFunction
 import io.reactivex.functions.Function3
@@ -36,8 +35,8 @@ interface CalculationViewModelInputs {
 
 interface CalculationViewModelOutputs {
 
-    val costList: BehaviorSubject<List<Cost>>
-    val percentageList: BehaviorSubject<List<Percentage>>
+    val costList: Observable<List<Cost>>
+    val percentageList: Observable<List<Percentage>>
     val templateList: Observable<List<Template>>
 
     fun displayFixedCost(): Observable<String>
@@ -57,6 +56,8 @@ interface CalculationViewModelOutputs {
     val showSaveDialog: Observable<Unit>
     val showLoadDialog: Observable<Unit>
     val templateLoaded: Observable<Unit>
+
+    val showListsTitle: Observable<Boolean>
 }
 
 class CalculationViewModel(application: Application) :
@@ -90,9 +91,9 @@ class CalculationViewModel(application: Application) :
     //endregion
 
     //region Output Variables
-    override val costList: BehaviorSubject<List<Cost>> = BehaviorSubject.createDefault(mutableListOf())
-    override val percentageList: BehaviorSubject<List<Percentage>> = BehaviorSubject.createDefault(mutableListOf())
-    override val templateList: Observable<List<Template>> = repo.getAllTemplate
+    override val costList: Observable<List<Cost>> = repo.getAllCost.observeOn(AndroidSchedulers.mainThread())
+    override val percentageList: Observable<List<Percentage>> = repo.getAllPercentage.observeOn(AndroidSchedulers.mainThread())
+    override val templateList: Observable<List<Template>> = repo.getAllTemplate.observeOn(AndroidSchedulers.mainThread())
 
     //The streams that output the calculations as Strings and update texts
 
@@ -108,6 +109,8 @@ class CalculationViewModel(application: Application) :
     override val showSaveDialog: PublishSubject<Unit> = PublishSubject.create()
     override val showLoadDialog: PublishSubject<Unit> = PublishSubject.create()
     override val templateLoaded: PublishSubject<Unit> = PublishSubject.create()
+
+    override val showListsTitle: Observable<Boolean> = showListTitle()
     //endregion
 
     private val templateObservableList = listOf(
@@ -125,11 +128,10 @@ class CalculationViewModel(application: Application) :
     //region logic
     override fun templateClicked(template: Template, fromDialog: Boolean) {
 
-        costList.onNext(template.costList)
-        percentageList.onNext(template.percentageList)
-
         singleCostOutput.onNext(template.singleCost)
         singlePercentageOutput.onNext(template.singlePercentage)
+        onSingleCostStringChanged(template.singleCost)
+        onSinglePercentageChanged(template.singlePercentage)
 
         onProfitMarginTextChangeByUser(template.profitMargin)
         profitMarginOutput.onNext(template.profitMargin)
@@ -142,6 +144,11 @@ class CalculationViewModel(application: Application) :
 
     }
 
+    private fun showListTitle(): Observable<Boolean>{
+        return combineLatest(costList, percentageList, BiFunction { costList, percentageList ->
+            !(costList.isEmpty() && percentageList.isEmpty())
+        })
+    }
     //Use the sharedPref to find the current template to load
     fun loadTemplate(): Observable<Template> {
         return repo.getTemplateById(SharePref.templateID).observeOn(AndroidSchedulers.mainThread())
@@ -154,8 +161,6 @@ class CalculationViewModel(application: Application) :
             val template = Template(
                 id = SharePref.templateID,
                 name = SharePref.templateName,
-                costList = (observableList[0] as List<Cost>),
-                percentageList = (observableList[1] as List<Percentage>),
                 singleCost = observableList[2] as String,
                 singlePercentage = observableList[3] as String,
                 markup = (observableList[4] as String),
@@ -304,6 +309,7 @@ class CalculationViewModel(application: Application) :
     fun onSettingsBtnClicked(){
         settingsBtnClicked.onNext(Unit)
         repo.insertCost(Cost(cost = "12", name = "weleve"))
+        repo.insertPercentage(Percentage(cost = "12", name = "weleve"))
     }
 
     fun onSingleCostStringChanged(text: String){
@@ -364,8 +370,6 @@ class CalculationViewModel(application: Application) :
 
             val template = Template(
                 name = (observableList[0] as String),
-                costList = (observableList[1] as List<Cost>),
-                percentageList = (observableList[2] as List<Percentage>),
                 singleCost = observableList[2] as String,
                 singlePercentage = observableList[3] as String,
                 markup = (observableList[4] as String),

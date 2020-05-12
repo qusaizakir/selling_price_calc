@@ -14,7 +14,7 @@ import com.qzakapps.sellingpricecalc.models.Percentage
 import com.qzakapps.sellingpricecalc.models.Template
 
 
-@Database(entities = [Cost::class, Percentage::class, Template::class], version = 4, exportSchema = true)
+@Database(entities = [Cost::class, Percentage::class, Template::class], version = 5, exportSchema = true)
 @TypeConverters(Converters::class)
 abstract class AppDatabase : RoomDatabase() {
 

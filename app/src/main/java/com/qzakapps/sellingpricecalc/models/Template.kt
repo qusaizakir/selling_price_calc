@@ -13,8 +13,6 @@ data class Template (
     val name: String,
     val singleCost: String,
     val singlePercentage: String,
-    val costList: List<Cost>,
-    val percentageList: List<Percentage>,
     val markup: String,
     val salePrice: String,
     val profit: String,

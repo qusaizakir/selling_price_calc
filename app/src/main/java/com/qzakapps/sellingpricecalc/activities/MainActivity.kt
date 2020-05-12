@@ -11,12 +11,11 @@ import kotlinx.android.synthetic.main.main_activity.*
 
 class MainActivity : AppCompatActivity() {
 
-    val COST_FRAGMENT_ID = 0;
-    val CALC_FRAGMENT_ID = 1;
-    val PERC_FRAGMENT_ID = 2;
+    private val COST_FRAGMENT_ID = "COST_FRAGMENT_ID";
+    private val CALC_FRAGMENT_ID = "CALC_FRAGMENT_ID";
+    private val PERC_FRAGMENT_ID = "PERC_FRAGMENT_ID";
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        SqlScoutServer.create(this, packageName);
         super.onCreate(savedInstanceState)
         setContentView(R.layout.main_activity)
         setupBottomNavigation()
@@ -45,16 +44,16 @@ class MainActivity : AppCompatActivity() {
         goToFragment(CALC_FRAGMENT_ID)
     }
 
-    private fun goToFragment(id: Int){
+    private fun goToFragment(id: String){
         val fragment = when(id){
-            COST_FRAGMENT_ID -> CostListFragment.newInstance()
-            CALC_FRAGMENT_ID -> CalculationFragment.newInstance()
-            PERC_FRAGMENT_ID -> PercentageListFragment.newInstance()
+            COST_FRAGMENT_ID -> supportFragmentManager.findFragmentByTag(COST_FRAGMENT_ID) ?: CostListFragment.newInstance()
+            CALC_FRAGMENT_ID -> supportFragmentManager.findFragmentByTag(CALC_FRAGMENT_ID) ?: CalculationFragment.newInstance()
+            PERC_FRAGMENT_ID -> supportFragmentManager.findFragmentByTag(PERC_FRAGMENT_ID) ?: PercentageListFragment.newInstance()
             else -> CalculationFragment.newInstance()
         }
 
         supportFragmentManager.beginTransaction()
-            .replace(R.id.fragment_container, fragment)
+            .replace(R.id.fragment_container, fragment, id)
             .commitNow()
     }
 }

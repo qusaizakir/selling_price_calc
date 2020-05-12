@@ -39,4 +39,7 @@
     <string name="saved_toast">Saved</string>
     <string name="override_current">Override Current</string>
     <string name="calculation">Calculation</string>
+    <string name="fixed_cost">Fixed Cost</string>
+    <string name="active_costs">Active Costs</string>
+    <string name="inactive_costs">Inactive Costs</string>
 </resources>

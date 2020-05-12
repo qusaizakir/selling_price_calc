@@ -65,6 +65,9 @@ class CalculationFragment : BaseFragment<CalculationViewModel>() {
         //Loading template adapter
         loadTemplateDialogAdapter = CalculationLoadTemplateRecyclerAdapter(templateClickedInterface = viewModel)
 
+        //Load saved template
+        viewModel.loadTemplate().subscribeOn(Schedulers.io()).subscribe { template ->  viewModel.templateClicked(template)}.autoDispose()
+
         //Create Dialogs
         createLoadDialog()
         createSaveDialog()
@@ -94,6 +97,10 @@ class CalculationFragment : BaseFragment<CalculationViewModel>() {
         //region outputs
         viewModel.outputs.costList.subscribe { costList -> costAdapter.setData(costList)}.autoDispose()
         viewModel.outputs.percentageList.subscribe{ percentageList -> percentageAdapter.setData(percentageList)}.autoDispose()
+        viewModel.outputs.showListsTitle.subscribe { show ->
+            listTitlesLL.visibility = if(show) View.VISIBLE else View.GONE
+            recyclerListLL.visibility =if(show) View.VISIBLE else View.GONE
+        }.autoDispose()
 
         viewModel.singleCostOutput.subscribe{t -> calculationCostEt.setText(t)}.autoDispose()
         viewModel.singlePercentageOutput.subscribe{t -> calculationPercentageEt.setText(t)}.autoDispose()
@@ -127,13 +134,6 @@ class CalculationFragment : BaseFragment<CalculationViewModel>() {
     override fun onPause() {
         viewModel.saveCurrentTemplate()
         super.onPause()
-    }
-
-    override fun onResume() {
-        viewModel.loadTemplate().subscribeOn(Schedulers.io()).subscribe {
-                template ->  viewModel.templateClicked(template)
-            Toast.makeText(context, template.name + "", Toast.LENGTH_SHORT).show()}.autoDispose()
-        super.onResume()
     }
 
     private fun createSaveDialog() {
