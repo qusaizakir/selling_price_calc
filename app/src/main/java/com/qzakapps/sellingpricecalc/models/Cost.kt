@@ -11,4 +11,5 @@ data class Cost(
     @PrimaryKey
     val id: String = UUID.randomUUID().toString(),
     val name: String,
-    val cost: String)
+    val cost: String,
+    val active: Boolean = false)

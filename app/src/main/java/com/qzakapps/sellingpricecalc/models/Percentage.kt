@@ -11,4 +11,5 @@ data class Percentage(
     @PrimaryKey
     val id: String = UUID.randomUUID().toString(),
     val name: String,
-    val cost: String)
+    val percentage: String,
+    val active: Boolean = false)

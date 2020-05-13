@@ -4,21 +4,28 @@
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/percentageListRecyclerView"
+    <com.airbnb.epoxy.EpoxyRecyclerView
+        android:id="@+id/percentageListRecyclerview"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-        android:layout_margin="16dp"
+        android:layout_marginEnd="16dp"
+        android:paddingTop="16dp"
+        android:layout_marginStart="16dp"
+        android:overScrollMode="never"
         />
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
+    <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+        android:id="@+id/percentageListFragmentFAB"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
+        android:layout_marginBottom="@dimen/list_fab_height"
         android:layout_marginEnd="16dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        android:text="@string/add_percentage"
+        style="@style/ListFragmentFAB"
+        android:backgroundTint="@color/colorPrimaryDark"
         />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
-    android:id="@+id/costListRecyclerviewLL"
+    android:id="@+id/percentageListRecyclerviewLL"
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -8,7 +8,7 @@
     android:orientation="horizontal">
 
     <TextView
-        android:id="@+id/costListNameTextView"
+        android:id="@+id/percentageListNameTextView"
         style="@style/TitleText"
         android:textSize="28sp"
         android:text="@string/percentage_fee"
@@ -18,7 +18,7 @@
         android:textAlignment="center" />
 
     <TextView
-        android:id="@+id/costListNumberTextView"
+        android:id="@+id/percentageListNumberTextView"
         style="@style/TitleText"
         android:layout_width="0dp"
         android:layout_weight="1"

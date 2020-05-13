@@ -6,6 +6,7 @@ import com.qzakapps.sellingpricecalc.helper.*
 import com.qzakapps.sellingpricecalc.models.*
 import io.reactivex.Observable
 import io.reactivex.Observable.combineLatest
+import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.functions.BiFunction
 import io.reactivex.functions.Function3
@@ -31,6 +32,8 @@ interface CalculationViewModelInputs {
 
     val saveTemplateBtnClicked: PublishSubject<String>
     val settingsBtnClicked: PublishSubject<Unit>
+    val costListRVClicked: PublishSubject<Unit>
+    val percentageListRVClicked: PublishSubject<Unit>
 }
 
 interface CalculationViewModelOutputs {
@@ -58,6 +61,8 @@ interface CalculationViewModelOutputs {
     val templateLoaded: Observable<Unit>
 
     val showListsTitle: Observable<Boolean>
+    val goToCostListFragment: Observable<Unit>
+    val goToPercentageListFragment: Observable<Unit>
 }
 
 class CalculationViewModel(application: Application) :
@@ -88,11 +93,13 @@ class CalculationViewModel(application: Application) :
 
     override val saveTemplateBtnClicked: PublishSubject<String> = PublishSubject.create()
     override val settingsBtnClicked: PublishSubject<Unit> = PublishSubject.create()
+    override val costListRVClicked: PublishSubject<Unit> = PublishSubject.create()
+    override val percentageListRVClicked: PublishSubject<Unit> = PublishSubject.create()
     //endregion
 
     //region Output Variables
-    override val costList: Observable<List<Cost>> = repo.getAllCost.observeOn(AndroidSchedulers.mainThread())
-    override val percentageList: Observable<List<Percentage>> = repo.getAllPercentage.observeOn(AndroidSchedulers.mainThread())
+    override val costList: Observable<List<Cost>> = repo.getAllActiveCosts().observeOn(AndroidSchedulers.mainThread())
+    override val percentageList: Observable<List<Percentage>> = repo.getAllActivePercentages().observeOn(AndroidSchedulers.mainThread())
     override val templateList: Observable<List<Template>> = repo.getAllTemplate.observeOn(AndroidSchedulers.mainThread())
 
     //The streams that output the calculations as Strings and update texts
@@ -111,6 +118,8 @@ class CalculationViewModel(application: Application) :
     override val templateLoaded: PublishSubject<Unit> = PublishSubject.create()
 
     override val showListsTitle: Observable<Boolean> = showListTitle()
+    override val goToCostListFragment: Observable<Unit> = costListRVClicked
+    override val goToPercentageListFragment: Observable<Unit> = percentageListRVClicked
     //endregion
 
     private val templateObservableList = listOf(
@@ -150,17 +159,17 @@ class CalculationViewModel(application: Application) :
         })
     }
     //Use the sharedPref to find the current template to load
-    fun loadTemplate(): Observable<Template> {
-        return repo.getTemplateById(SharePref.templateID).observeOn(AndroidSchedulers.mainThread())
+    fun loadUnsavedCalculation(): Single<Template> {
+        return repo.getTemplateById(UNSAVED_TEMPLATE_ID).observeOn(AndroidSchedulers.mainThread())
     }
 
     //Save all changes to the current working template, uses shared pref to save template ID/Name
-    fun saveCurrentTemplate(){
+    fun saveUnsavedCalculation(){
         combineLatest(templateObservableList){ observableList ->
 
             val template = Template(
-                id = SharePref.templateID,
-                name = SharePref.templateName,
+                id = UNSAVED_TEMPLATE_ID,
+                name = UNSAVED_TEMPLATE_ID,
                 singleCost = observableList[2] as String,
                 singlePercentage = observableList[3] as String,
                 markup = (observableList[4] as String),
@@ -309,7 +318,7 @@ class CalculationViewModel(application: Application) :
     fun onSettingsBtnClicked(){
         settingsBtnClicked.onNext(Unit)
         repo.insertCost(Cost(cost = "12", name = "weleve"))
-        repo.insertPercentage(Percentage(cost = "12", name = "weleve"))
+        repo.insertPercentage(Percentage(percentage = "12", name = "weleve"))
     }
 
     fun onSingleCostStringChanged(text: String){
@@ -362,6 +371,14 @@ class CalculationViewModel(application: Application) :
     fun onMarkupTextChangeByUser(text: String){
         markup.onNext(toBigDecimal(text))
     }
+
+    fun onCostListRVClicked(){
+        costListRVClicked.onNext(Unit);
+    }
+
+    fun onPercentageListRVClicked(){
+        percentageListRVClicked.onNext(Unit);
+    }
     //endregion
 
     //region outputs
@@ -395,10 +412,10 @@ class CalculationViewModel(application: Application) :
 
     override fun displayPercentageCost(): Observable<String> {
         return combineLatest(percentageList, singlePercentageFullString, BiFunction<List<Percentage>, String, List<Percentage>> { percList, singlePerc ->
-            percList + Percentage(name = SINGLE_PERCENTAGE, cost = singlePerc)
+            percList + Percentage(name = SINGLE_PERCENTAGE, percentage = singlePerc)
         }).map { percCost ->
             var total = BigDecimal.ZERO
-            percCost.forEach { perc -> total += toBigDecimal(perc.cost) }
+            percCost.forEach { perc -> total += toBigDecimal(perc.percentage) }
             percentCost.onNext(total)
             return@map total.toString()
         }.observeOn(AndroidSchedulers.mainThread())

@@ -8,6 +8,9 @@ import com.afollestad.materialdialogs.MaterialDialog
 import com.afollestad.materialdialogs.customview.customView
 import com.afollestad.materialdialogs.customview.getCustomView
 import com.qzakapps.sellingpricecalc.R
+import com.qzakapps.sellingpricecalc.activities.COST_FRAGMENT_ID
+import com.qzakapps.sellingpricecalc.activities.MainActivity
+import com.qzakapps.sellingpricecalc.activities.PERC_FRAGMENT_ID
 import com.qzakapps.sellingpricecalc.adapters.CalculationCostRecyclerAdapter
 import com.qzakapps.sellingpricecalc.adapters.CalculationLoadTemplateRecyclerAdapter
 import com.qzakapps.sellingpricecalc.adapters.CalculationPercentageRecyclerAdapter
@@ -66,7 +69,7 @@ class CalculationFragment : BaseFragment<CalculationViewModel>() {
         loadTemplateDialogAdapter = CalculationLoadTemplateRecyclerAdapter(templateClickedInterface = viewModel)
 
         //Load saved template
-        viewModel.loadTemplate().subscribeOn(Schedulers.io()).subscribe { template ->  viewModel.templateClicked(template)}.autoDispose()
+        viewModel.loadUnsavedCalculation().subscribeOn(Schedulers.io()).subscribe { template ->  viewModel.templateClicked(template)}.autoDispose()
 
         //Create Dialogs
         createLoadDialog()
@@ -91,6 +94,14 @@ class CalculationFragment : BaseFragment<CalculationViewModel>() {
         calculationProfitEt.doAfterTextChanged { text ->
             if(calculationProfitEt.hasFocus()) { viewModel.onProfitTextChangeByUser(text.toString()) }
             viewModel.onProfitStringChanged(text.toString())
+        }
+
+        calculationCostTitleTv.setOnClickListener {
+            viewModel.onCostListRVClicked()
+        }
+
+        calculationPercentageTitleTv.setOnClickListener {
+            viewModel.onPercentageListRVClicked()
         }
         //endregion
 
@@ -127,12 +138,15 @@ class CalculationFragment : BaseFragment<CalculationViewModel>() {
                 Toast.makeText(context, "Loaded Template", Toast.LENGTH_SHORT).show()
             }
         }.autoDispose()
+
+        viewModel.outputs.goToCostListFragment.subscribe{context?.let { context -> (context as MainActivity).clickOnBottomMenuItem(COST_FRAGMENT_ID) }}.autoDispose()
+        viewModel.outputs.goToPercentageListFragment.subscribe{context?.let { context -> (context as MainActivity).clickOnBottomMenuItem(PERC_FRAGMENT_ID) }}.autoDispose()
         //endregion
 
     }
 
     override fun onPause() {
-        viewModel.saveCurrentTemplate()
+        viewModel.saveUnsavedCalculation()
         super.onPause()
     }
 
@@ -152,7 +166,7 @@ class CalculationFragment : BaseFragment<CalculationViewModel>() {
                                 nameTextInput.error = ""
                                 dismiss()
                             }else{
-                                nameTextInput.error = getString(R.string.template_name_error)
+                                nameTextInput.error = getString(R.string.empty_error)
                             }
                         }
                         negativeButton (R.string.cancel) { dismiss() }

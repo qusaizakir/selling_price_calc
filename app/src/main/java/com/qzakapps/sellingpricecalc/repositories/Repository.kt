@@ -41,6 +41,24 @@ class Repository(
             .subscribeOn(Schedulers.io())
             .subscribe()
     }
+
+    fun deleteCostById(id: String){
+        Completable
+            .fromAction{ costDao.deleteCostByID(id) }
+            .subscribeOn(Schedulers.io())
+            .subscribe()
+    }
+
+    fun toggleActiveCost(id: String){
+        Completable
+            .fromAction{ costDao.toggleActiveCost(id) }
+            .subscribeOn(Schedulers.io())
+            .subscribe()
+    }
+
+    fun getAllActiveCosts(): Observable<List<Cost>>{
+        return costDao.getAllActiveCosts()
+    }
     //endregion
 
     //region Percentage methods
@@ -63,6 +81,24 @@ class Repository(
             .fromAction{ percentageDao.deleteAllPercentage()}
             .subscribeOn(Schedulers.io())
             .subscribe()
+    }
+
+    fun deletePercentageById(id: String){
+        Completable
+            .fromAction{ percentageDao.deletePercentageByID(id) }
+            .subscribeOn(Schedulers.io())
+            .subscribe()
+    }
+
+    fun toggleActivePercentage(id: String){
+        Completable
+            .fromAction{ percentageDao.toggleActivePercentage(id) }
+            .subscribeOn(Schedulers.io())
+            .subscribe()
+    }
+
+    fun getAllActivePercentages(): Observable<List<Percentage>>{
+        return percentageDao.getAllActivePercentages()
     }
     //endregion
 
@@ -88,7 +124,7 @@ class Repository(
             .subscribe()
     }
 
-    fun getTemplateById(id: String): Observable<Template>{
+    fun getTemplateById(id: String): Single<Template>{
         return templateDao.getTemplateById(id)
     }
     //endregion

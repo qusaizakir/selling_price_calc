@@ -20,6 +20,15 @@ interface CostDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertCostList(costList: List<Cost>)
 
+    @Query("DELETE FROM Cost WHERE :id = id")
+    fun deleteCostByID(id: String)
+
     @Query("DELETE FROM Cost")
     fun deleteAllCost()
+
+    @Query("UPDATE Cost SET active = NOT active WHERE :id = id")
+    fun toggleActiveCost(id: String)
+
+    @Query("SELECT * FROM Cost WHERE active = 1")
+    fun getAllActiveCosts(): Observable<List<Cost>>
 }

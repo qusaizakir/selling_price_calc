@@ -22,5 +22,5 @@ interface TemplateDao {
     fun deleteAllTemplates()
 
     @Query("SELECT * FROM Template WHERE :id = id")
-    fun getTemplateById(id: String): Observable<Template>
+    fun getTemplateById(id: String): Single<Template>
 }

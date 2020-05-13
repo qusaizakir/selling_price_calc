@@ -20,7 +20,7 @@ class CalculationPercentageRecyclerAdapter (private val dataList: MutableList<Pe
     override fun onBindViewHolder(holder: TitleNumberViewHolder, position: Int) {
         dataList[position].run {
             holder.itemView.titleTextView.text = name
-            holder.itemView.numberTextView.text = cost
+            holder.itemView.numberTextView.text = percentage
         }
     }
 

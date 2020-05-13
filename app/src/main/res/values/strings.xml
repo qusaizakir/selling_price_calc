@@ -14,7 +14,7 @@
     <string name="percentage_cost">Percentage Cost</string>
     <string name="cost">Cost</string>
     <string name="percentage">Percentage</string>
-    <string name="percentage_fee">Percentage Fee</string>
+    <string name="percentage_fee"><u>Percentage Fees</u></string>
     <string name="name">Name</string>
     <string name="price">Price</string>
     <string name="percentage_format">%1$s%%</string>
@@ -32,14 +32,26 @@
     <string name="load_dialog_message">Load the Cost List, Percentage List and the current calculations. Select a Template</string>
     <string name="save">Save</string>
     <string name="template_name">Template Name</string>
-    <string name="template_name_error">Cannot be empty</string>
+    <string name="empty_error">Cannot be empty</string>
     <string name="cancel">Cancel</string>
     <string name="load">Load</string>
     <string name="settings">Settings</string>
     <string name="saved_toast">Saved</string>
     <string name="override_current">Override Current</string>
     <string name="calculation">Calculation</string>
-    <string name="fixed_cost">Fixed Cost</string>
+    <string name="fixed_cost"><u>Fixed Costs</u></string>
     <string name="active_costs">Active Costs</string>
     <string name="inactive_costs">Inactive Costs</string>
+    <string name="inactive_percentages">Inactive Percentages</string>
+    <string name="active_percentages">Active Percentages</string>
+    <string name="cost_value">Cost Value</string>
+    <string name="cost_added">Cost Added!</string>
+    <string name="add_percentage">Add Percentage</string>
+    <string name="percentage_value">Percentage Value</string>
+    <string name="empty_content_cost_list">Add fixed costs that will be used in all calculations when made active. \nAdd a cost below.</string>
+    <string name="instructions_cost_list">Active Costs will be used in all calculations. \nClick to toggle active status, swipe to delete cost.</string>
+    <string name="empty_content_percentage_list">Add percentage fees that will be used in all calculations when made active. \nAdd a percentage below.</string>
+    <string name="instructions_percentage_list">Active Percentage will be used in all calculations. A percentage fee will be subtracted from the sale price. \nClick to toggle active status, swipe to delete cost.</string>
+    <string name="additional_cost">Extra Cost</string>
+    <string name="additional_percentage">Extra Percentage</string>
 </resources>
