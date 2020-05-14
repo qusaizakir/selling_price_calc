@@ -148,9 +148,11 @@ class CalculationViewModel(application: Application) :
         singlePercentageOutput.onNext(template.singlePercentage)
         onSingleCostStringChanged(template.singleCost)
         onSinglePercentageChanged(template.singlePercentage)
-
         onProfitMarginTextChangeByUser(template.profitMargin)
         profitMarginOutput.onNext(template.profitMargin)
+
+        repo.setOnlyCostsActive(template.costIdList)
+        repo.setOnlyPercentagesActive(template.percentageIdList)
 
         if (fromDialog) {
             templateLoaded.onNext(Unit)

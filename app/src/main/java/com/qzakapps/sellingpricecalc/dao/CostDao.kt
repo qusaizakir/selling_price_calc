@@ -31,4 +31,7 @@ interface CostDao {
 
     @Query("SELECT * FROM Cost WHERE active = 1")
     fun getAllActiveCosts(): Observable<List<Cost>>
+
+    @Query("Update Cost Set active = CASE WHEN id IN(:ids) THEN 1 ELSE 0 END")
+    fun setOnlyCostsActive(ids: List<String>)
 }

@@ -59,6 +59,13 @@ class Repository(
     fun getAllActiveCosts(): Observable<List<Cost>>{
         return costDao.getAllActiveCosts()
     }
+
+    fun setOnlyCostsActive(ids: List<String>){
+        Completable
+            .fromAction{costDao.setOnlyCostsActive(ids)}
+            .subscribeOn(Schedulers.io())
+            .subscribe()
+    }
     //endregion
 
     //region Percentage methods
@@ -99,6 +106,13 @@ class Repository(
 
     fun getAllActivePercentages(): Observable<List<Percentage>>{
         return percentageDao.getAllActivePercentages()
+    }
+
+    fun setOnlyPercentagesActive(ids: List<String>){
+        Completable
+            .fromAction{percentageDao.setOnlyPercentagesActive(ids)}
+            .subscribeOn(Schedulers.io())
+            .subscribe()
     }
     //endregion
 

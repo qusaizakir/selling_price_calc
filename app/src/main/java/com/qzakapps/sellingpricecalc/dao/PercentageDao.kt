@@ -31,4 +31,7 @@ interface PercentageDao {
 
     @Query("SELECT * FROM Percentage WHERE active = 1")
     fun getAllActivePercentages(): Observable<List<Percentage>>
+
+    @Query("Update Percentage Set active = CASE WHEN id IN(:ids) THEN 1 ELSE 0 END")
+    fun setOnlyPercentagesActive(ids: List<String>)
 }
