@@ -45,6 +45,7 @@ interface CalculationViewModelOutputs {
     fun displayFixedCost(): Observable<String>
     fun displayPercentageCost(): Observable<String>
 
+    fun loadCurrentTemplateName(): Observable<String>
 
     val singleCostOutput: BehaviorSubject<String>
     val singlePercentageOutput: BehaviorSubject<String>
@@ -55,7 +56,7 @@ interface CalculationViewModelOutputs {
 
     val profitMarginError: PublishSubject<Boolean>
 
-    fun saveTemplate(): Observable<Unit>
+    fun saveNewTemplate(): Observable<Unit>
     val showSaveDialog: Observable<Unit>
     val showLoadDialog: Observable<Unit>
     val templateLoaded: Observable<Unit>
@@ -113,6 +114,8 @@ class CalculationViewModel(application: Application) :
 
     override val profitMarginError: PublishSubject<Boolean> = PublishSubject.create()
 
+    val getCurrentTemplateNamePs: PublishSubject<String> = PublishSubject.create()
+
     override val showSaveDialog: PublishSubject<Unit> = PublishSubject.create()
     override val showLoadDialog: PublishSubject<Unit> = PublishSubject.create()
     override val templateLoaded: PublishSubject<Unit> = PublishSubject.create()
@@ -135,6 +138,10 @@ class CalculationViewModel(application: Application) :
     val outputs: CalculationViewModelOutputs = this
 
     //region logic
+    override fun loadCurrentTemplateName(): Observable<String>{
+        return getCurrentTemplateNamePs.map { SharePref.templateName }
+    }
+
     override fun templateClicked(template: Template, fromDialog: Boolean) {
 
         singleCostOutput.onNext(template.singleCost)
@@ -144,13 +151,14 @@ class CalculationViewModel(application: Application) :
 
         onProfitMarginTextChangeByUser(template.profitMargin)
         profitMarginOutput.onNext(template.profitMargin)
-        SharePref.templateID = template.id
-        SharePref.templateName = template.name
 
         if (fromDialog) {
             templateLoaded.onNext(Unit)
+            SharePref.templateID = template.id
+            SharePref.templateName = template.name
         }
 
+        getCurrentTemplateNamePs.onNext(SharePref.templateName)
     }
 
     private fun showListTitle(): Observable<Boolean>{
@@ -167,11 +175,16 @@ class CalculationViewModel(application: Application) :
     fun saveUnsavedCalculation(){
         combineLatest(templateObservableList){ observableList ->
 
+            val costIdList = (observableList[0] as List<Cost>).map { cost -> cost.id }
+            val percentageIdList =(observableList[1] as List<Percentage>).map { percentage -> percentage.id }
+
             val template = Template(
                 id = UNSAVED_TEMPLATE_ID,
                 name = UNSAVED_TEMPLATE_ID,
                 singleCost = observableList[2] as String,
                 singlePercentage = observableList[3] as String,
+                costIdList = costIdList,
+                percentageIdList = percentageIdList,
                 markup = (observableList[4] as String),
                 salePrice = (observableList[5] as String),
                 profit = (observableList[6] as String),
@@ -373,26 +386,35 @@ class CalculationViewModel(application: Application) :
     }
 
     fun onCostListRVClicked(){
-        costListRVClicked.onNext(Unit);
+        costListRVClicked.onNext(Unit)
     }
 
     fun onPercentageListRVClicked(){
-        percentageListRVClicked.onNext(Unit);
+        percentageListRVClicked.onNext(Unit)
     }
     //endregion
 
     //region outputs
-    override fun saveTemplate(): Observable<Unit> {
+    private fun getTemplateNameObservable(): Observable<String> {
+        return PublishSubject.create<String>().map { SharePref.templateName }
+    }
+
+    override fun saveNewTemplate(): Observable<Unit> {
         return saveTemplateBtnClicked.withLatestFrom(templateObservableList){ observableList ->
+
+            val costIdList = (observableList[1] as List<Cost>).map { cost -> cost.id }
+            val percentageIdList =(observableList[2] as List<Percentage>).map { percentage -> percentage.id }
 
             val template = Template(
                 name = (observableList[0] as String),
-                singleCost = observableList[2] as String,
-                singlePercentage = observableList[3] as String,
-                markup = (observableList[4] as String),
-                salePrice = (observableList[5] as String),
-                profit = (observableList[6] as String),
-                profitMargin = (observableList[7] as String))
+                singleCost = (observableList[3] as String),
+                singlePercentage = (observableList[4] as String),
+                markup = (observableList[5] as String),
+                costIdList = costIdList,
+                percentageIdList = percentageIdList,
+                salePrice = (observableList[6] as String),
+                profit = (observableList[7] as String),
+                profitMargin = (observableList[8] as String))
 
             repo.insertTemplate(template)
             templateClicked(template, true)

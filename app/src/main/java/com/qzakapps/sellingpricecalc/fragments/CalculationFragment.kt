@@ -69,7 +69,7 @@ class CalculationFragment : BaseFragment<CalculationViewModel>() {
         loadTemplateDialogAdapter = CalculationLoadTemplateRecyclerAdapter(templateClickedInterface = viewModel)
 
         //Load saved template
-        viewModel.loadUnsavedCalculation().subscribeOn(Schedulers.io()).subscribe { template ->  viewModel.templateClicked(template)}.autoDispose()
+        viewModel.loadUnsavedCalculation().subscribeOn(Schedulers.io()).subscribe { template, _ ->  template?.let {viewModel.templateClicked(template, false)} }.autoDispose()
 
         //Create Dialogs
         createLoadDialog()
@@ -126,7 +126,7 @@ class CalculationFragment : BaseFragment<CalculationViewModel>() {
 
         viewModel.outputs.profitMarginError.subscribe{showError -> calculationProfitMarginTi.error = if(showError) getString(R.string.profit_margin_error) else "" }.autoDispose()
 
-        viewModel.outputs.saveTemplate().subscribe{ Toast.makeText(context, getString(R.string.saved_toast), Toast.LENGTH_SHORT).show()}.autoDispose()
+        viewModel.outputs.saveNewTemplate().subscribe{ Toast.makeText(context, getString(R.string.saved_toast), Toast.LENGTH_SHORT).show()}.autoDispose()
 
         viewModel.outputs.showSaveDialog.subscribe { saveDialog?.show() }.autoDispose()
         viewModel.outputs.showLoadDialog.subscribe { loadDialog?.show() }.autoDispose()
@@ -141,6 +141,7 @@ class CalculationFragment : BaseFragment<CalculationViewModel>() {
 
         viewModel.outputs.goToCostListFragment.subscribe{context?.let { context -> (context as MainActivity).clickOnBottomMenuItem(COST_FRAGMENT_ID) }}.autoDispose()
         viewModel.outputs.goToPercentageListFragment.subscribe{context?.let { context -> (context as MainActivity).clickOnBottomMenuItem(PERC_FRAGMENT_ID) }}.autoDispose()
+        viewModel.outputs.loadCurrentTemplateName().subscribe{text -> currentTemplateTv.text = text.toString()}.autoDispose()
         //endregion
 
     }
@@ -168,6 +169,9 @@ class CalculationFragment : BaseFragment<CalculationViewModel>() {
                             }else{
                                 nameTextInput.error = getString(R.string.empty_error)
                             }
+                        }
+                        neutralButton(R.string.override_current) {
+
                         }
                         negativeButton (R.string.cancel) { dismiss() }
                     }

@@ -30,7 +30,7 @@
     <string name="save_template">Save Template</string>
     <string name="save_dialog_message">Save the Cost List, Percentage List and the current calculations.</string>
     <string name="load_dialog_message">Load the Cost List, Percentage List and the current calculations. Select a Template</string>
-    <string name="save">Save</string>
+    <string name="save">Save as New</string>
     <string name="template_name">Template Name</string>
     <string name="empty_error">Cannot be empty</string>
     <string name="cancel">Cancel</string>
@@ -54,4 +54,6 @@
     <string name="instructions_percentage_list">Active Percentage will be used in all calculations. A percentage fee will be subtracted from the sale price. \nClick to toggle active status, swipe to delete cost.</string>
     <string name="additional_cost">Extra Cost</string>
     <string name="additional_percentage">Extra Percentage</string>
+    <string name="current_template">Current Template:</string>
+    <string name="n_a">N/A</string>
 </resources>
